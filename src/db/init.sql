@@ -7,10 +7,10 @@ CREATE TABLE IF NOT EXISTS "users" (
   "username" TEXT UNIQUE,
   "first_name" TEXT,
   "last_name" TEXT,
-  "email" TEXT NOT NULL,
+  "email" TEXT UNIQUE NOT NULL,
   "password" TEXT NOT NULL,
   "paid_plan" plans DEFAULT 'basic',
-  "mobile" INTEGER,
+  "mobile" INTEGER UNIQUE,
   "mobile_ext" INTEGER DEFAULT 00357,
   "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   "is_confirmed" BOOLEAN DEFAULT FALSE,
@@ -36,6 +36,7 @@ CREATE TABLE "confirmation" (
   "type" confirmations NOT NULL,
   "send_at" TIMESTAMP NOT NULL,
   "confirmed_at" TIMESTAMP,
+  "notes" TEXT,
   "code" INTEGER,
   PRIMARY KEY ("username", "type")
   FOREIGN KEY ("username") REFERENCES "users"("username")
