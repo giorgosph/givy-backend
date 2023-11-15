@@ -1,0 +1,11 @@
+node_modules
+.vscode
+.idea
+.DS_Store
+.git
+.gitattributes
+.env
+package-lock.json
+data
+migrations
+.eslintrc.json

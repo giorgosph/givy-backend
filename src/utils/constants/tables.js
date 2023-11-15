@@ -1,0 +1,1 @@
+// add table names ex. USERS = 'users' 
