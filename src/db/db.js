@@ -1,28 +1,46 @@
 const { Pool } = require("pg");
 require("dotenv").config();
 
-let pool;
+const pool = new Pool({
+  user: process.env.DATABASE_USER,
+  host: process.env.DATABASE_HOST,
+  database: process.env.DATABASE_NAME,
+  password: process.env.DATABASE_PASS,
+  port: process.env.DATABASE_PORT,
+});
 
-if (process.env.NODE_ENV === "production") {
-  pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: {
-      rejectUnauthorized: false,
-    },
-  });
-} else {
-  //for local development with dockerized db
-  pool = new Pool({
-    user: process.env.DATABASE_USER,
-    host: process.env.DATABASE_HOST,
-    database: process.env.DATABASE_NAME,
-    password: process.env.DATABASE_PASS,
-    port: process.env.DATABASE_PORT,
-  });
+const startTransaction = async () => {
+  const client = await pool.connect();
+  console.log("Cennected to database");
+
+  try {
+    await client.query("BEGIN");
+    return client;
+  } catch (error) {
+    client.release();
+    throw error;
+  }
+};
+
+const commitTransaction = async client => {
+  await client.query("COMMIT");
+  console.log("Transaction committed");
+  endTransaction(client);
+};
+
+const rollbackTransaction = async client => {
+  await client.query("ROLLBACK");
+  console.log("Transaction rollbacked");
+  endTransaction(client);
+};
+
+const endTransaction = async client => {  
+  await client.release();
+  console.log("Disconnected from database");
 }
+/* --------------------- Check Connection --------------------- */
 
-//anonymous function to check connection to db
-(async function () {
+(async() => {
   try {
     const res = await pool.query("SELECT NOW()");
     console.log("DATABASE connected", res.rows[0].now);
@@ -31,4 +49,11 @@ if (process.env.NODE_ENV === "production") {
   }
 })();
 
-module.exports = pool;
+module.exports = { 
+  transaction: {
+    start: startTransaction, 
+    commit: commitTransaction, 
+    rollback: rollbackTransaction,
+    end: endTransaction
+  }
+};

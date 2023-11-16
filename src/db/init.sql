@@ -38,7 +38,7 @@ CREATE TABLE "confirmation" (
   "confirmed_date" TIMESTAMP,
   "notes" TEXT,
   "code" INTEGER,
-  PRIMARY KEY ("username", "type")
+  PRIMARY KEY ("username", "type"),
   FOREIGN KEY ("username") REFERENCES "users"("username")
 );
 

@@ -6,5 +6,7 @@ const auth = require("../controllers/auth.controller");
 
 /* ------------------------ Auth Routes ------------------------ */
 
-router.put("/login", verifyToken, auth.login);
-router.post("/register", verifyToken, auth.register);
+router.put("/login", auth.login);
+router.post("/register", auth.register);
+
+module.exports = router;

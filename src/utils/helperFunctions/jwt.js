@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const response = require("../responses/auth.response");
+const response = require("../../responses/auth.response");
 
 const signToken = (user, res) => {
   const payload = {

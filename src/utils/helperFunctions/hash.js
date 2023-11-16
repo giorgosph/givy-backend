@@ -4,6 +4,7 @@ const encrypt = async (password) => {
   try {
     const salt = await bcrypt.genSalt();
     const hashed = await bcrypt.hash(password, salt);
+
     return hashed;
   } catch (err) {
     throw new Error("Error while hashing password:\n" + err)
