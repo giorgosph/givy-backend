@@ -1,8 +1,7 @@
 const User = require("../models/index").User;
 const UserActivity = require("../models/index").UserActivity;
 
-const response = require("../utils/responses/auth.response");
-const responseError = require("../utils/responses/error.response");
+const response = require("../utils/responses/index");
 
 const hash = require("../utils/helperFunctions/hash").encrypt;
 const signToken = require("../utils/helperFunctions/jwt").signToken;
@@ -15,7 +14,7 @@ const register = async (req, res) => {
   try {
     // Check if the user's details are already registered
     const userExists = await User.findUser({ username, email });
-    if (userExists?.exist) return response.userExists(res, userExists.type);
+    if (userExists?.exist) return response.auth.userExists(res, userExists.type);
 
     // Encrypt password and register user
     const hashed = await hash({ password });
@@ -34,7 +33,7 @@ const register = async (req, res) => {
   } catch (err) {
     // TODO -> create logging system
     console.error("Error Creating User:\n", err);
-    responseError.generic(res);
+    response.error.generic(res);
   }
 };
 
@@ -46,12 +45,12 @@ const login = async (req, res) => {
     // Check if the user exists
     let user = await User.findByUsername(username);
     if(!user) user = await User.findByEmail(username);
-    if(!user) return response.userNotAuthenticated(res);
+    if(!user) return response.auth.userNotAuthenticated(res);
 
     // Compare passwords
     // const authed = await compareKeys(req.body.password, user.password);
     const authed = password == user.password;
-    if(!authed) return response.userNotAuthenticated(res);
+    if(!authed) return response.auth.userNotAuthenticated(res);
     
     // Sign activity
     await UserActivity.updateActivity({username, type: 'login'});
@@ -61,7 +60,7 @@ const login = async (req, res) => {
   } catch (err) {
      // TODO -> create logging system
      console.error("Error Logging User:\n", err);
-     responseError.generic(res);
+     response.error.generic(res);
   }
 };
 
