@@ -1,4 +1,5 @@
 const db = require("../db/db");
+const USERS = require("../utils/constants/tables").USERS;
 
 module.exports = class User {
   constructor(data) {
@@ -22,7 +23,7 @@ module.exports = class User {
   }
 
   static async getAll() {
-    const allUsers = await db.query("SELECT * FROM users;");
+    const allUsers = await db.query(`SELECT * FROM ${USERS};`);
     let user = allUsers.rows.map((user) => new User(user));
     return user;
   }
@@ -44,19 +45,19 @@ module.exports = class User {
   }
 
   static async findByEmail(email) {
-    const user = await db.query("SELECT * FROM users WHERE email = $1;", [email]);
+    const user = await db.query(`SELECT * FROM ${USERS} WHERE email = $1;`, [email]);
     if (user.rows.length) return new User(user.rows[0]);
     else return false;
   }
 
   static async findByUsername(username) {
-    const user = await db.query("SELECT * FROM users WHERE username = $1;", [username]);
+    const user = await db.query(`SELECT * FROM ${USERS} WHERE username = $1;`, [username]);
     if (user.rows.length) return new User(user.rows[0]);
     else return false;
   }
 
   static async findByMobile(mobile) {
-    const user = await db.query("SELECT * FROM users WHERE mobile = $1;", [mobile]);
+    const user = await db.query(`SELECT * FROM ${USERS} WHERE mobile = $1;`, [mobile]);
     if (user.rows.length) return new User(user.rows[0]);
     else return false;
   }
@@ -66,9 +67,9 @@ module.exports = class User {
   static async register(data) {
     try {
       const user = await db.query(
-        "INSERT INTO users \
+        `INSERT INTO ${USERS} \
         (username, first_name, last_name, email, password, mobile, mobile_ext, gender, country, city, address_line_1, address_line_2, postal_code) \
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *;",
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *;`,
         [
           data.username,
           data.firstName,
@@ -95,7 +96,7 @@ module.exports = class User {
 
   static async setConfirmationCode(userInfo, code = null) {
     const result = await db.query(
-      `UPDATE users SET code=$2 WHERE username=$1 or email=$1 RETURNING *;`,
+      `UPDATE ${USERS} SET code=$2 WHERE username=$1 or email=$1 RETURNING *;`,
       [userInfo, code]
     );
     return result.rowCount;
@@ -103,25 +104,9 @@ module.exports = class User {
 
   static async updatePassword(userInfo, password) {
     const res = await db.query(
-      `UPDATE users SET password=$1 WHERE username=$2 or email=$2 RETURNING username`,
+      `UPDATE ${USERS} SET password=$1 WHERE username=$2 or email=$2 RETURNING username`,
       [password, userInfo]
     );
     return res.rowCount;
-  }
-
-  async save() {
-    const updatedUser = await db.query(
-      `UPDATE users SET first_name = $1, last_name = $2, email = $3, mobile_num = $4
-      WHERE username = $5 RETURNING *;`,
-      [this.firstName, this.lastName, this.email, this.mobileNum, this.username]
-    );
-    return new User(updatedUser.rows[0]);
-  }
-
-  static async setRoleRequest(username, value) {
-    await db.query(`UPDATE users SET has_role_request=$1 WHERE username=$2`, [
-      value,
-      username,
-    ]);
-  }
+  };
 };
