@@ -9,7 +9,6 @@ const userNotAuthenticated = (res) => {
 }
 
 const sendToken = (res, token) => {
-  console.log(`Sending token ${token}`);
   const message = `Logged in successfully`;
   res.status(201).json({ success: true, body: { token: `Bearer ${token}` }, message: message });
 };

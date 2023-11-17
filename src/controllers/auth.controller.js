@@ -30,11 +30,10 @@ const register = async (req, res) => {
     await UserActivity.insertActivity({ username, type: 'register' }, client);
     await UserActivity.insertActivity({ username, type: 'login' }, client);
     
-    // Commit database changes
+    // Send token and commit database changes
+    signToken(user, res);
     await transaction.commit(client);
     console.log("New User:\n", user);
-
-    signToken(user, res);
   } catch (err) {
     // TODO -> create logging system
     await transaction.rollback(client);
@@ -59,19 +58,20 @@ const login = async (req, res) => {
     }
 
     // Compare passwords
-    // const authed = await compareKeys(req.body.password, user.password);
-    const authed = password == user.password;
+    const authed = await compareKeys(req.body.password, user.password);
+    // const authed = password == user.password;
     if(!authed) {
       await transaction.end(client);
       return response.auth.userNotAuthenticated(res);
     }
     
-    // Sign activity and commit to database
+    // Sign activity
     await UserActivity.updateActivity({username, type: 'login'}, client);
+    
+    // Send token and commit database changes
+    signToken(user, res);
     await transaction.commit(client);
     console.log("User logged in -> ", user.username);
-
-    signToken(user, res);
   } catch (err) {
      // TODO -> create logging system
      console.error("Error Logging User:\n", err);
