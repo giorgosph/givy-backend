@@ -13,8 +13,14 @@ const sendToken = (res, token) => {
   res.status(201).json({ success: true, body: { token: `Bearer ${token}` }, message: message });
 };
 
+const noPrivilages = (res) => {
+  const message = 'No Privilages';
+  res.status(403).send({ success: false, message: message });
+}
+
 module.exports = {
   userExists,
   userNotAuthenticated,
   sendToken,
+  noPrivilages,
 }

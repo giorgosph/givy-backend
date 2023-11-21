@@ -1,28 +1,17 @@
-const jwt = require("jsonwebtoken");
-
-const extractToken = (req) => {
-  const header = req.headers["authorization"];
-  if (header) {
-    const token = header.split(" ")[1].trim();
-    console.log("RESET:\n", token);
-    const decodedToken = jwt.verify(token, process.env.SECRET);
-    return decodedToken;
-  }
-};
+const extractToken = require("../utils/helperFunctions/jwt").extractToken;
+const response = require("../responses/index")
 
 function verifyToken(req, res, next) {
-  console.log(req.headers);
   try {
     const token = extractToken(req);
+
     if (token) {
       req.decodedToken = token;
       next();
-    } else {
-      res.status(403).send({ success: false, message: "No token provided!" });
-    }
+    } else response.auth.noPrivilages(res);
   } catch (err) {
     console.error("Error verifying token:\n", err.message);
-    res.status(403).send({ success: false });
+    response.error.generic(res);
   }
 }
 
@@ -30,7 +19,7 @@ function verifyUserApproved(req, res, next) {
   if (req.decodedToken.review === "approved") {
     next();
   } else {
-    res.status(403).send({ success: false, message: "User not approved" });
+    response.auth.noPrivilages(res);
   }
 }
 
@@ -39,10 +28,7 @@ function verifyUserRole(requiredRole) {
     if (req.decodedToken.role === requiredRole) {
       next();
     } else {
-      res.status(403).send({
-        success: false,
-        message: "User does not meet role requirement",
-      });
+      response.auth.noPrivilages(res);
     }
   };
 }
@@ -59,10 +45,7 @@ function verifyAll(requiredRoles) {
       req.decodedToken = token;
       next();
     } else {
-      res.status(403).send({
-        success: false,
-        message: "User could not be authenticated",
-      });
+      response.auth.noPrivilages(res);
     }
   };
 }

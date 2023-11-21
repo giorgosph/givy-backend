@@ -1,6 +1,6 @@
 CREATE TYPE genders AS ENUM('male', 'female', 'other');
 CREATE TYPE plans AS ENUM('basic', 'premium', 'platinum');
-CREATE TYPE activities AS ENUM('register', 'login', 'open_app', 'email_confrimation', 'mobile_confirmation', 'reset_password');
+CREATE TYPE activities AS ENUM('register', 'login', 'open_app', 'email_confirmation', 'mobile_confirmation', 'reset_password', 'update_details');
 CREATE TYPE confirmations AS ENUM('email', 'mobile');
 
 CREATE TABLE IF NOT EXISTS "users" (

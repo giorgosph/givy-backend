@@ -58,7 +58,7 @@ const login = async (req, res) => {
     }
 
     // Compare passwords
-    const authed = await compareKeys(req.body.password, user.password);
+    const authed = await compareKeys(password, user.password);
     // const authed = password == user.password;
     if(!authed) {
       await transaction.end(client);

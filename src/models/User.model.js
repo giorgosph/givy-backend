@@ -29,6 +29,7 @@ module.exports = class User {
   }
 
   /* ----------------- Find User ----------------- */
+  /* --------------------------------------------- */
 
   static async findUser(data, client) {
     let user = await this.findByUsername(data.username, client);
@@ -65,6 +66,7 @@ module.exports = class User {
   }
 
   /* ----------------- Auth User ----------------- */
+  /* --------------------------------------------- */
   
   static async register(data, client) {
     const user = await client.query(
@@ -92,13 +94,15 @@ module.exports = class User {
     else return false;
   }
 
-  static async setConfirmationCode(userInfo, code = null, client) {
-    const result = await client.query(
-      `UPDATE ${USERS} SET code=$2 WHERE username=$1 or email=$1 RETURNING *;`,
-      [userInfo, code]
-    );
+  /* ----------------- Update User ----------------- */
+  /* ----------------------------------------------- */
 
-    return result.rowCount;
+  static async updateEmail(data, client) {
+    await client.query(`UPDATE ${USERS} SET email=$1 WHERE username=$2`, [data.email, data.username]);
+  }
+
+  static async updateMobile(data, client) {
+    await client.query(`UPDATE ${USERS} SET mobile=$1 WHERE username=$2`, [data.mobile, data.username]);
   }
 
   static async updatePassword(userInfo, password, client) {
