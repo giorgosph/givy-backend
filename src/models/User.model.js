@@ -105,9 +105,16 @@ module.exports = class User {
     await client.query(`UPDATE ${USERS} SET mobile=$1 WHERE username=$2`, [data.mobile, data.username]);
   }
 
+  static async updateAddress(data, client) {
+    await client.query(`UPDATE ${USERS} SET country=$1 AND city=$2 AND address_line_1=$3 
+      AND address_line_2=$4 AND postal_code= $5 WHERE username=$6`, 
+      [data?.country, data?.city, data?.address1, data?.address2, data?.postalCode, data.username]
+    );
+  }
+
   static async updatePassword(userInfo, password, client) {
     const res = await client.query(
-      `UPDATE ${USERS} SET password=$1 WHERE username=$2 or email=$2 RETURNING username`,
+      `UPDATE ${USERS} SET password=$1 WHERE username=$2 OR email=$2`,
       [password, userInfo]
     );
 

@@ -8,6 +8,20 @@ const transaction = require("../db/db").transaction;
 const emailer = require("../utils/helperFunctions/email");
 const genToken = require("../utils/helperFunctions/token");
 
+/* ---------------------- Update Details --------------------------- */
+/* ----------------------------------------------------------------- */
+
+const getUser = async (res, username, client) => {
+  const user = await User.findUserByUsername(username);
+  if(!user) {
+    await transaction.end(client);
+    return response.auth.userNotAuthenticated(res);
+  } return user;
+}
+
+/* ---------------------- Update Details --------------------------- */
+/* ----------------------------------------------------------------- */
+
 const editContactDetails = async (req, res) => {
   const { username } = req.decodedToken
   const { email, mobile } = req.body
@@ -16,11 +30,7 @@ const editContactDetails = async (req, res) => {
   try {
     const client = transaction.start();    
     
-    const user = await User.findUserByUsername(username);
-    if(!user) {
-      await transaction.end(client);
-      return response.auth.userNotAuthenticated(res);
-    }
+    const user = await getUser(res, username, client);
     const newEmail = email !== user.email;
     const newMobile = mobile !== user.mobile;
 
@@ -41,14 +51,38 @@ const editContactDetails = async (req, res) => {
     // if user is present in confirmation table then confirmation is pending
     // after confirmation is successful remove from confirmation table and insert to user activity  
     await transaction.commit();
-    response.success(res)
+    response.success(res);
   } catch (err) {
     await transaction.rollback(client);
-    console.error("Error Creating User:\n", err);
+    console.error("Error Updating User's Contact Details:\n", err);
     response.error.generic(res);
   }
 }
 
-module.exports = {
-  editContactDetails,
+const editShippingDetails = async (req, res) => {
+  const { username } = req.decodedToken
+  const type = 'update_details';
+
+  try {
+    const client = await transaction.start();
+
+    await getUser(res, username, client);
+    await User.updateAddress({ ...req.body, username: username }, client);
+    await UserActivity.insert({type, username}, client);
+    
+    await transaction.commit();
+    response.success(res);
+  } catch (err) {
+    await transaction.rollback(client);
+    console.error("Error Updating User's Shipping Details:\n", err);
+    response.error.generic(res);
+  }
+
 }
+
+module.exports = {
+  getUser,
+  editContactDetails,
+  editShippingDetails,
+}
+
