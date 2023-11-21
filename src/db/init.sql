@@ -34,8 +34,7 @@ CREATE TABLE "user_activity" (
 CREATE TABLE "confirmation" (
   "username" TEXT NOT NULL,
   "type" confirmations NOT NULL,
-  "sended_date" TIMESTAMP NOT NULL,
-  "confirmed_date" TIMESTAMP,
+  "sended_date" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   "notes" TEXT,
   "code" INTEGER,
   PRIMARY KEY ("username", "type"),

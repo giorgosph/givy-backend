@@ -28,13 +28,13 @@ module.exports = class UserActivity {
   /* ----------------- Insert/Update Activity ----------------- */
   /* ---------------------------------------------------------- */
 
-  static async insertActivity(data, client) {  
+  static async insert(data, client) {  
     await client.query(
       `INSERT INTO ${U_ACTIV} (username, type) VALUES ($1, $2) RETURNING *;`, [data.username, data.type]
     );
   };
 
-  static async updateActivity(data, client) {  
+  static async update(data, client) {  
     const date = new Date();
     await client.query(
       `UPDATE ${U_ACTIV} SET last_activity_date=$1 where username=$2 AND type=$3 RETURNING *;`, 

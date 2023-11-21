@@ -1,7 +1,5 @@
 const nodemailer = require("nodemailer");
-const testRecipient = process.env.EMAIL_RECIPIENT;
-
-const qr = require("qrcode");
+// const qr = require("qrcode");
 
 const transporter = nodemailer.createTransport({
   service: process.env.EMAIL_SERVICE,
@@ -10,15 +8,16 @@ const transporter = nodemailer.createTransport({
     pass: process.env.EMAIL_PASSWORD,
   },
 });
-async function sendEmail(recipient, link) {
+
+async function send() {
   // Create a transporter using SMTP
 
   // Define the email options
   const mailOptions = {
     from: process.env.EMAIL,
-    to: process.env.EMAIL_RECIPIENT, // recipient
+    to: process.env.EMAIL_RECIPIENT,
     subject: "Test Email",
-    text: `This is a test email sent from Node.js using Nodemailer. Here is the forgot password link:\n ${link}`,
+    text: `This is a test email sent from Node.js using Nodemailer.`,
   };
 
   // Send the email
@@ -30,6 +29,9 @@ async function sendEmail(recipient, link) {
   }
 }
 
+/* --------------------------------------------------------- */
+
+/*
 async function generateQRCodeBase64(data) {
   return new Promise((resolve, reject) => {
     qr.toDataURL(data, (err, qrDataURL) => {
@@ -81,5 +83,9 @@ async function sendEmailWithQRCode(dataArr) {
     console.error("Error sending email:", error);
   }
 }
+*/
 
-module.exports = { sendEmail, sendEmailWithQRCode };
+module.exports = { 
+  send, 
+  // sendEmailWithQRCode 
+};

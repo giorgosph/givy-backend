@@ -1,4 +1,4 @@
-const randomNumbers = (length = 6) => {
+const random = (length = 6) => {
   let token = '';
 
   for (let i = 0; i < length; i++) {
@@ -9,4 +9,6 @@ const randomNumbers = (length = 6) => {
   return token;
 };
 
-module.exports = randomNumbers;
+module.exports = {
+  random
+};

@@ -27,8 +27,8 @@ const register = async (req, res) => {
 
     // Register user and sign activities
     const user = await User.register({ ...req.body, password: hashed }, client);
-    await UserActivity.insertActivity({ username, type: 'register' }, client);
-    await UserActivity.insertActivity({ username, type: 'login' }, client);
+    await UserActivity.insert({ username, type: 'register' }, client);
+    await UserActivity.insert({ username, type: 'login' }, client);
     
     // Send token and commit database changes
     signToken(user, res);
@@ -66,7 +66,7 @@ const login = async (req, res) => {
     }
     
     // Sign activity
-    await UserActivity.updateActivity({username, type: 'login'}, client);
+    await UserActivity.update({username, type: 'login'}, client);
     
     // Send token and commit database changes
     signToken(user, res);
