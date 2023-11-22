@@ -8,8 +8,8 @@ const transaction = require("../db/db").transaction;
 const emailer = require("../utils/helperFunctions/email");
 const genToken = require("../utils/helperFunctions/token");
 
-/* ---------------------- Update Details --------------------------- */
-/* ----------------------------------------------------------------- */
+/* ---------------------- Get User --------------------------- */
+/* ----------------------------------------------------------- */
 
 const getUser = async (res, username, client) => {
   const user = await User.findUserByUsername(username);
@@ -23,9 +23,11 @@ const getUser = async (res, username, client) => {
 /* ----------------------------------------------------------------- */
 
 const editContactDetails = async (req, res) => {
-  const { username } = req.decodedToken
+  const { username } = req.decodedToken;
   const { email, mobile } = req.body
   const type = 'update_details';
+  
+  console.log(`Editing Contact Details`);
 
   try {
     const client = transaction.start();    

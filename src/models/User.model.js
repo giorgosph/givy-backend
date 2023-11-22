@@ -75,18 +75,18 @@ module.exports = class User {
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *;`,
       [
         data.username,
-        data.fullName,
-        data?.lastName || null,
+        data.firstName,
+        data.lastName,
         data.email,
         data.password,
-        data?.mobile || null,
+        data?.mobile,
         data?.mobileExt || '00357',
-        data?.gender || null,
-        data?.country || null,
-        data?.city || null, 
-        data?.address1 || null,
-        data?.address2 || null,
-        data?.postalCode || null,
+        data.gender,
+        data?.country,
+        data?.city, 
+        data?.address1,
+        data?.address2,
+        data?.postalCode,
       ]
     );
 
