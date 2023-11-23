@@ -2,6 +2,8 @@ const extractToken = require("../utils/helperFunctions/jwt").extractToken;
 const response = require("../responses/index")
 
 function verifyToken(req, res, next) {
+  console.log(`Verifying token...`);
+
   try {
     const token = extractToken(req);
 

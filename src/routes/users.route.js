@@ -10,8 +10,9 @@ const users = require("../controllers/index").users;
 router.put("/login", auth.login);
 router.post("/register", auth.register);
 
-/* ------------------------ Details Routes ------------------------ */
+/* ------------------------ User Details Routes ------------------------ */
 
+router.get("/details", verifyToken, users.getUserDetails);
 router.put("/details/contact", verifyToken, users.editContactDetails);
 router.put("/details/shipping", verifyToken, users.editShippingDetails);
 

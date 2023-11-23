@@ -1,12 +1,17 @@
 const User = require("../models/index").User;
 const UserActivity = require("../models/index").UserActivity;
+const Confirmation = require("../models/index").Confirmation;
 
 const transaction = require("../db/db").transaction;
 const response = require("../responses/index");
 
+const emailer = require("../utils/helperFunctions/email");
+const genToken = require("../utils/helperFunctions/token");
 const hash = require("../utils/helperFunctions/hash").encrypt;
 const signToken = require("../utils/helperFunctions/jwt").signToken;
 const compareKeys = require("../utils/helperFunctions/hash").compareKeys;
+
+/* -------------------------------------------------------------------------- */
 
 const register = async (req, res) => {
   console.log("Creating new User...");
@@ -25,8 +30,14 @@ const register = async (req, res) => {
     // Encrypt password 
     const hashed = await hash(password);
 
-    // Register user and sign activities
+    // Register user and send confirmation email
     const user = await User.register({ ...req.body, password: hashed }, client);
+    const randToken = genToken.random();
+    await Confirmation.insert({type: 'email', username, code: randToken, notes: 'register'}, client);
+    // TODO -> add confirmation and send sms for mobile
+    await emailer.send();
+
+    // Sign activities
     await UserActivity.insert({ username, type: 'register' }, client);
     await UserActivity.insert({ username, type: 'login' }, client);
     

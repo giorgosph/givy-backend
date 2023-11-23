@@ -36,9 +36,22 @@ module.exports = class UserActivity {
 
   static async update(data, client) {  
     const date = new Date();
+
     await client.query(
-      `UPDATE ${U_ACTIV} SET last_activity_date=$1 where username=$2 AND type=$3 RETURNING *;`, 
+      `UPDATE ${U_ACTIV} SET last_activity_date=$1 where username=$2 AND type=$3;`, 
       [date, data.username, data.type]
     );
   };
+
+  static async upsert(data, client) {  
+    const date = new Date();
+    
+    await client.query(
+      `INSERT INTO ${U_ACTIV} (username, type, last_activity_date) 
+       VALUES ($1, $2, $3) 
+       ON CONFLICT (username, type) DO UPDATE SET last_activity_date = $3;`, 
+      [data.username, data.type, date]
+    );
+  };
+  
 };

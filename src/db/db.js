@@ -10,10 +10,12 @@ const pool = new Pool({
 });
 
 const startTransaction = async () => {
-  const client = await pool.connect();
-  console.log("Cennected to database");
-
+  let client
+  
   try {
+    client = await pool.connect();
+    console.log("Cennected to database");
+
     await client.query("BEGIN");
     return client;
   } catch (error) {

@@ -98,18 +98,29 @@ module.exports = class User {
   /* ----------------------------------------------- */
 
   static async updateEmail(data, client) {
-    await client.query(`UPDATE ${USERS} SET email=$1 WHERE username=$2`, [data.email, data.username]);
+    const email = await client.query(`UPDATE ${USERS} SET email=$1 WHERE username=$2 RETURNING email`,
+     [data.email, data.username]
+    );
+
+    return email.rows[0].email
   }
 
   static async updateMobile(data, client) {
-    await client.query(`UPDATE ${USERS} SET mobile=$1 WHERE username=$2`, [data.mobile, data.username]);
+    const mobile = await client.query(`UPDATE ${USERS} SET mobile=$1 WHERE username=$2 RETURNING mobile`, 
+      [data.mobile, data.username]
+    );
+
+    return mobile.rows[0].mobile
   }
 
   static async updateAddress(data, client) {
-    await client.query(`UPDATE ${USERS} SET country=$1 AND city=$2 AND address_line_1=$3 
-      AND address_line_2=$4 AND postal_code= $5 WHERE username=$6`, 
-      [data?.country, data?.city, data?.address1, data?.address2, data?.postalCode, data.username]
+    const user = await client.query(`UPDATE ${USERS} SET country=$1, city=$2, address_line_1=$3, 
+      address_line_2=$4, postal_code=$5 WHERE username=$6 RETURNING *;`, 
+      [data.country, data.city, data.address1, data.address2, data.postalCode, data.username]
     );
+
+    if (user.rows.length) return new User(user.rows[0]);
+    else return false;
   }
 
   static async updatePassword(userInfo, password, client) {
