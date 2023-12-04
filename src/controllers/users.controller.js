@@ -17,7 +17,7 @@ const getUser = async (res, username, client) => {
     await transaction.end(client);
     return response.auth.userNotAuthenticated(res);
   } return user;
-}
+};
 
 const getUserDetails = async (req, res) => {
   console.log("Getting User Details");
@@ -35,7 +35,7 @@ const getUserDetails = async (req, res) => {
     console.error("Error Getting User's Details:\n", err);
     response.error.generic(res);
   }
-}
+};
 
 /* ---------------------- Update Details --------------------------- */
 /* ----------------------------------------------------------------- */
@@ -92,7 +92,7 @@ const editContactDetails = async (req, res) => {
     console.error("Error Updating User's Contact Details:\n", err);
     response.error.generic(res);
   }
-}
+};
 
 const editShippingDetails = async (req, res) => {
   console.log("Editing Shipping Details");
@@ -114,8 +114,7 @@ const editShippingDetails = async (req, res) => {
     console.error("Error Updating User's Shipping Details:\n", err);
     response.error.generic(res);
   }
-
-}
+};
 
 module.exports = {
   getUser,
