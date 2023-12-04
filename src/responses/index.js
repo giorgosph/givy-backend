@@ -6,8 +6,14 @@ const success = (res, data) => {
   res.status(200).json({ success: true, body: data?.body || null, message: data?.message || message });
 }
 
+const noData = (res, data) => {
+  const message = "No data found!";
+  res.status(204).json({ success: true, message: data?.message || message });
+}
+
 module.exports = {
   auth,
   error,
-  success
+  success,
+  noData,
 }
