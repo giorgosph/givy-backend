@@ -7,7 +7,7 @@ const initialise = async () => {
   const client = await transaction.start();
 
   try {
-    const result = client.query(initTables)
+    const result = await client.query(initTables);
     console.log(result);
 
     await transaction.commit(client);

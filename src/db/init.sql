@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS "users" (
   "email" TEXT UNIQUE NOT NULL,
   "password" TEXT NOT NULL,
   "paid_plan" plans DEFAULT 'basic',
-  "mobile" INTEGER UNIQUE,
+  "mobile" TEXT UNIQUE,
   "mobile_ext" INTEGER,
   "creation_date" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   "is_confirmed" BOOLEAN DEFAULT FALSE,
@@ -50,10 +50,11 @@ CREATE TABLE IF NOT EXISTS "draw" (
   "type" plans DEFAULT 'basic',
   "image_path" TEXT,
   "opening_date" TIMESTAMP NOT NULL,
-  "creation_date" TIMESTAMP NOT NULL,
+  "creation_date" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   "closing_date" TIMESTAMP NOT NULL,
-  "winner" INTEGER,
-  PRIMARY KEY ("id")
+  "winner" TEXT,
+  PRIMARY KEY ("id"),
+  FOREIGN KEY ("winner") REFERENCES "users"("username")
 );
 
 CREATE TABLE IF NOT EXISTS "draw_attenant" (
@@ -70,7 +71,7 @@ CREATE TABLE IF NOT EXISTS "draw_item" (
   "title" TEXT,
   "category" item_categories,
   "description" TEXT,
-  "image_path" TEXT,
+  "image_path" TEXT, -- remove if will use draw_item_image for multiple images per item
   "brief" TEXT,
   "price" INTEGER,
   PRIMARY KEY ("id"),
