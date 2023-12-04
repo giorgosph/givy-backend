@@ -9,6 +9,7 @@ const drawAttenant = require("../controllers/index").drawAttenant;
 /* ------------------------ Get Routes ------------------------ */
 
 router.get("/", draw.getCurrentDraws);
+router.get("/items/:drawId", draw.getDrawItems);
 
 /* ------------------------ Opt in Route ------------------------ */
 

@@ -15,7 +15,7 @@ module.exports = class Draw {
   static async getAll(client) {
     const allDraws = await client.query(`SELECT * FROM ${DRAW};`);
 
-    const draws = allDraws.rows.map((user) => new Draw(user));
+    const draws = allDraws.rows.map((draw) => new Draw(draw));
     return draws;
   }
 };

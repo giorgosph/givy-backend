@@ -3,6 +3,7 @@ const UserActivity = require("./UserActivity.model");
 const Confirmation = require("./Confirmation.model");
 
 const Draw = require("./Draw.model");
+const DrawItem = require("./DrawItem.model");
 const DrawAttenant = require("./DrawAttenant.model");
 
 module.exports = {
@@ -10,5 +11,6 @@ module.exports = {
   UserActivity,
   Confirmation,
   Draw,
+  DrawItem,
   DrawAttenant,
 }
