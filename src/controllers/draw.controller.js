@@ -1,5 +1,6 @@
 const Draw = require("../models/index").Draw;
 const DrawItem = require("../models/index").DrawItem;
+const DrawAttenant = require("../models/index").DrawAttenant;
 
 const response = require("../responses/index");
 const transaction = require("../db/db").transaction;
@@ -14,18 +15,36 @@ const getCurrentDraws = async (req, res) => {
     const client = await transaction.start();
 
     const draws = await Draw.getAll(client);
+    await transaction.end(client);
     if(!draws) return response.noData(res);
     
+    // Remove past draws
     const currentDate = new Date();
-
-    // Filter draws where the closing date and time is not past the current date and time
     const currentDraws = draws.filter(draw => new Date(draw.closingDate) > currentDate);
-    await transaction.end(client);
+    if(!currentDraws) return response.noData(res, { message : 'No upcoming draws!' });
 
-    if(!draws) return response.noData(res, { message : 'No upcoming draws!' });
     response.success(res, { body: currentDraws });
-  } catch (error) {
-    console.error("Error Getting Current Draws:\n", error);
+  } catch (err) {
+    console.error("Error Getting Current Draws:\n", err);
+    await transaction.end(client);
+    response.error.generic(res);
+  }
+};
+
+const getUserDraws = async (req, res) => {
+  console.log("Getting user draws...");
+
+  try {
+    const { username } = req.decodedToken;
+    const client = await transaction.start();
+
+    const draws = await DrawAttenant.findByUsername(username, client);
+    await transaction.end(client);
+    if(!draws) return response.noData(res);
+
+    response.success(res, { body: draws });
+  } catch (err) {
+    console.error("Error Getting User Draws:\n", err);
     await transaction.end(client);
     response.error.generic(res);
   }
@@ -54,5 +73,6 @@ const getDrawItems = async (req, res) => {
 
 module.exports = {
   getCurrentDraws,
+  getUserDraws,
   getDrawItems,
 }

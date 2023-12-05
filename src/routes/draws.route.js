@@ -10,6 +10,7 @@ const drawAttenant = require("../controllers/index").drawAttenant;
 
 router.get("/", draw.getCurrentDraws);
 router.get("/items/:drawId", draw.getDrawItems);
+router.get("/user", verifyToken, draw.getUserDraws);
 
 /* ------------------------ Opt in Route ------------------------ */
 

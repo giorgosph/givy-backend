@@ -8,7 +8,7 @@ const success = (res, data) => {
 
 const noData = (res, data) => {
   const message = "No data found!";
-  res.status(204).json({ success: true, message: data?.message || message });
+  res.status(204).json({ success: false, message: data?.message || message });
 }
 
 module.exports = {

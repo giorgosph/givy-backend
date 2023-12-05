@@ -19,15 +19,20 @@ module.exports = class DrawAttenant {
   static async findByDraw(drawId, client) {
     const allUsers = await client.query(`SELECT * FROM ${D_ATTENANT} WHERE draw_id = $1;`, [drawId]);
 
-    const users = allUsers.rows.map((user) => new DrawAttenant(user));
-    return users;
+    if(allUsers.rows.length > 0) {
+      const users = allUsers.rows.map((user) => new DrawAttenant(user));
+      return users;
+    } else return false;
   }
 
   static async findByUsername(username, client) {
-    const allDraws = await client.query(`SELECT * FROM ${D_ATTENANT} WHERE username = $1;`, [username]);
+    // if app/data scales in future add -> where closing_date is > today from draw table
+    const allDraws = await client.query(`SELECT draw_id FROM ${D_ATTENANT} WHERE username = $1;`, [username]);
 
-    const draws = allDraws.rows.map((draw) => new DrawAttenant(draw));
-    return draws;
+    if(allDraws.rows.length > 0) {
+      const draws = allDraws.rows.map((draw) => new DrawAttenant(draw));
+      return draws;
+    } else return false;
   }
 
   /* ----------------- Register ----------------- */
