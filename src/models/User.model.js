@@ -19,6 +19,7 @@ module.exports = class User {
     this.address1 = data.address_line_1;
     this.address2 = data.address_line_2;
     this.postalCode = data.postal_code;
+    this.role = data.role;
   }
 
   static async getAll(client) {

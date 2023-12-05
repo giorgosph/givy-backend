@@ -4,6 +4,7 @@ module.exports = class Draw {
   constructor(data) {
     this.id = data.id;
     this.title = data.title;
+    this.brief = data.brief;
     this.type = data.type;
     this.imagePath = data.image_path;
     this.openingDate = data.opening_date;

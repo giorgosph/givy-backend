@@ -47,6 +47,7 @@ CREATE TABLE IF NOT EXISTS "confirmation" (
 CREATE TABLE IF NOT EXISTS "draw" (
   "id" SERIAL,
   "title" TEXT NOT NULL,
+  "brief" TEXT,
   "type" plans DEFAULT 'basic',
   "image_path" TEXT,
   "opening_date" TIMESTAMP NOT NULL,
