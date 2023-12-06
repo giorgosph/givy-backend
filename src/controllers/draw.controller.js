@@ -14,16 +14,11 @@ const getCurrentDraws = async (req, res) => {
   try {
     const client = await transaction.start();
 
-    const draws = await Draw.getAll(client);
+    const draws = await Draw.getUpcomingDraws(client);
     await transaction.end(client);
     if(!draws) return response.noData(res);
-    
-    // Remove past draws
-    const currentDate = new Date();
-    const currentDraws = draws.filter(draw => new Date(draw.closingDate) > currentDate);
-    if(!currentDraws) return response.noData(res, { message : 'No upcoming draws!' });
 
-    response.success(res, { body: currentDraws });
+    response.success(res, { body: draws });
   } catch (err) {
     console.error("Error Getting Current Draws:\n", err);
     await transaction.end(client);
@@ -38,11 +33,12 @@ const getUserDraws = async (req, res) => {
     const { username } = req.decodedToken;
     const client = await transaction.start();
 
-    const draws = await DrawAttenant.findByUsername(username, client);
+    const draws = await DrawAttenant.findUpcomingByUsername(username, client);
+    const wins = await Draw.findByWinner(username, client);
     await transaction.end(client);
-    if(!draws) return response.noData(res);
+    if(!draws && !wins) return response.noData(res);
 
-    response.success(res, { body: draws });
+    response.success(res, { body: { draws, wins} });
   } catch (err) {
     console.error("Error Getting User Draws:\n", err);
     await transaction.end(client);

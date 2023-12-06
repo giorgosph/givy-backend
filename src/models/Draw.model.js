@@ -19,4 +19,21 @@ module.exports = class Draw {
     const draws = allDraws.rows.map((draw) => new Draw(draw));
     return draws;
   }
+
+  static async getUpcomingDraws(client) {
+    const allDraws = await client.query(`SELECT * FROM ${DRAW} WHERE closing_date > CURRENT_TIMESTAMP;`);
+
+    const draws = allDraws.rows.map((draw) => new Draw(draw));
+    return draws;
+  }
+
+  /* ----------------- Finders ----------------- */
+  /* ------------------------------------------- */  
+
+  static async findByWinner(username, client) {
+    const allDraws = await client.query(`SELECT * FROM ${DRAW} WHERE winner=$1;`, [username]);
+
+    const draws = allDraws.rows.map((draw) => new Draw(draw));
+    return draws;
+  }
 };

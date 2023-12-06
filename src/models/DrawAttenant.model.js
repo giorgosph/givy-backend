@@ -1,4 +1,5 @@
 const D_ATTENANT = require("../utils/constants/tables").D_ATTENANT;
+const DRAW = require("../utils/constants/tables").DRAW;
 
 module.exports = class DrawAttenant {
   constructor(data) {
@@ -19,20 +20,19 @@ module.exports = class DrawAttenant {
   static async findByDraw(drawId, client) {
     const allUsers = await client.query(`SELECT * FROM ${D_ATTENANT} WHERE draw_id = $1;`, [drawId]);
 
-    if(allUsers.rows.length > 0) {
-      const users = allUsers.rows.map((user) => new DrawAttenant(user));
-      return users;
-    } else return false;
+    const users = allUsers.rows.map((user) => new DrawAttenant(user));
+    return users;
   }
 
-  static async findByUsername(username, client) {
-    // if app/data scales in future add -> where closing_date is > today from draw table
-    const allDraws = await client.query(`SELECT draw_id FROM ${D_ATTENANT} WHERE username = $1;`, [username]);
-
-    if(allDraws.rows.length > 0) {
-      const draws = allDraws.rows.map((draw) => new DrawAttenant(draw));
-      return draws;
-    } else return false;
+  static async findUpcomingByUsername(username, client) {
+    const allDraws = await client.query(
+      `SELECT da.draw_id FROM ${D_ATTENANT} AS da INNER JOIN ${DRAW} AS d ON da.draw_id = d.id
+      WHERE d.closing_date > CURRENT_TIMESTAMP AND da.username = $1;`, 
+      [username]
+    );
+  
+    const draws = allDraws.rows.map((draw) => new DrawAttenant(draw));
+    return draws;
   }
 
   /* ----------------- Register ----------------- */
@@ -44,7 +44,7 @@ module.exports = class DrawAttenant {
       [data.drawId, data.username]
     );
 
-    if (draw.rows.length) return new DrawAttenant(draw.rows[0]);
+    if (draw.rows.length > 0) return new DrawAttenant(draw.rows[0]);
     else return false;
   }
 
