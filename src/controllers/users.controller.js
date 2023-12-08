@@ -86,7 +86,7 @@ const editContactDetails = async (req, res) => {
     }else await transaction.end(client);
 
     console.log(`Sending response with email: ${newEmail} and mobile: ${newMobile}`);
-    response.success(res, { body: { email: newEmail, mobile: newMobile } });
+    response.success(res, { body: { contactDetails: { email: newEmail, mobile: newMobile }}});
   } catch (err) {
     await transaction.rollback(client);
     console.error("Error Updating User's Contact Details:\n", err);
@@ -108,7 +108,7 @@ const editShippingDetails = async (req, res) => {
     await UserActivity.upsert({type, username}, client);
     
     await transaction.commit(client);
-    response.success(res, { body: user });
+    response.success(res, { body: { shippingDetails: user }});
   } catch (err) {
     await transaction.rollback(client);
     console.error("Error Updating User's Shipping Details:\n", err);

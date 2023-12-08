@@ -7,7 +7,7 @@ const signToken = (user, res) => {
     email: user.email,
   };
 
-  jwt.sign(payload, process.env.SECRET, (err, token) => response.sendToken(res, token));
+  jwt.sign(payload, process.env.SECRET, (err, token) => response.sendToken(res, { user, token }));
 };
 
 const extractToken = (req) => {
