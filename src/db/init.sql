@@ -53,9 +53,7 @@ CREATE TABLE IF NOT EXISTS "draw" (
   "opening_date" TIMESTAMP NOT NULL,
   "creation_date" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   "closing_date" TIMESTAMP NOT NULL,
-  "winner" TEXT,
-  PRIMARY KEY ("id"),
-  FOREIGN KEY ("winner") REFERENCES "users"("username")
+  PRIMARY KEY ("id")
 );
 
 CREATE TABLE IF NOT EXISTS "draw_attenant" (
@@ -75,6 +73,7 @@ CREATE TABLE IF NOT EXISTS "draw_item" (
   "image_path" TEXT, -- remove if will use draw_item_image for multiple images per item
   "brief" TEXT,
   "price" INTEGER,
+  "winner" TEXT,
   PRIMARY KEY ("id"),
   FOREIGN KEY ("draw_id") REFERENCES "draw"("id")
 );

@@ -33,10 +33,10 @@ const getUserDraws = async (req, res) => {
     const { username } = req.decodedToken;
     const client = await transaction.start();
 
-    const draws = await DrawAttenant.findUpcomingByUsername(username, client);
-    const wins = await Draw.findByWinner(username, client);
+    const draws = await DrawAttenant.findUpcomingByUsername(username, client); // opted in draws
+    const wins = await DrawItem.findByWinner(username, client); // winning items
     await transaction.end(client);
-    if(!draws && !wins) return response.noData(res);
+    if(draws.length == 0 && wins.length == 0) return response.noData(res);
 
     response.success(res, { body: { draws, wins} });
   } catch (err) {
@@ -55,7 +55,7 @@ const getDrawItems = async (req, res) => {
   try {
     const client = await transaction.start();
 
-    const items = await DrawItem.getByDrawID(req.params.drawId, client);
+    const items = await DrawItem.findByDrawID(req.params.drawId, client);
     await transaction.end(client);
     
     if(!items) return response.noData(res);

@@ -14,7 +14,7 @@ const startTransaction = async () => {
   
   try {
     client = await pool.connect();
-    console.log("Cennected to database");
+    console.log("Connected to database");
 
     await client.query("BEGIN");
     return client;

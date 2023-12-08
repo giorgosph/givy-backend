@@ -10,7 +10,6 @@ module.exports = class Draw {
     this.openingDate = data.opening_date;
     this.creationDate = data.creation_date;
     this.closingDate = data.closing_date;
-    this.winner = data.winner;
   }
 
   static async getAll(client) {
@@ -22,16 +21,6 @@ module.exports = class Draw {
 
   static async getUpcomingDraws(client) {
     const allDraws = await client.query(`SELECT * FROM ${DRAW} WHERE closing_date > CURRENT_TIMESTAMP;`);
-
-    const draws = allDraws.rows.map((draw) => new Draw(draw));
-    return draws;
-  }
-
-  /* ----------------- Finders ----------------- */
-  /* ------------------------------------------- */  
-
-  static async findByWinner(username, client) {
-    const allDraws = await client.query(`SELECT * FROM ${DRAW} WHERE winner=$1;`, [username]);
 
     const draws = allDraws.rows.map((draw) => new Draw(draw));
     return draws;
