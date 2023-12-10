@@ -1,13 +1,13 @@
 const jwt = require("jsonwebtoken");
-const response = require("../../responses/auth.response");
 
-const signToken = (user, res) => {
+const signToken = (user) => {
   const payload = {
     username: user.username,
     email: user.email,
   };
 
-  jwt.sign(payload, process.env.SECRET, (err, token) => response.sendToken(res, { user, token }));
+  const token = jwt.sign(payload, process.env.SECRET);
+  return token;
 };
 
 const extractToken = (req) => {

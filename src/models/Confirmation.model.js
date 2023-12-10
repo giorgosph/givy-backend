@@ -19,7 +19,6 @@ module.exports = class Confirmation {
   /* ----------------- Find User ----------------- */
   /* --------------------------------------------- */
 
-
   static async findUserWithType(data, client) {  
     const user = await client.query(`SELECT * FROM ${CONFIRM} WHERE username=$1 AND type=$2;`, [data.username, data.type]);
 
@@ -33,15 +32,20 @@ module.exports = class Confirmation {
   static async insert(data, client) {  
     await client.query(
       `INSERT INTO ${CONFIRM} (username, type, notes, code) VALUES ($1, $2, $3, $4) RETURNING *;`, 
-      [data.username, data.type, data?.notes || null, data.code]
+      [data.username, data.type, data?.notes, data.code]
     );
   };
 
   static async update(data, client) {  
     const date = new Date();
     await client.query(
-      `UPDATE ${CONFIRM} SET last_activity_date=$1 where username=$2 AND type=$3 RETURNING *;`, 
-      [date, data.username, data.type]
-    );
+      `UPDATE ${CONFIRM} SET sended_date=$1, code=$2, notes=$3 WHERE username=$4 AND type=$5;`,
+      [date, data.code, data?.notes, data.username, data.type]
+    );    
   };
+
+  static async delete(data, client) { 
+    await client.query(`DELETE FROM ${CONFIRM} WHERE username=$1 AND type=$2`, [data.username, data.type]);
+  };
+  
 };

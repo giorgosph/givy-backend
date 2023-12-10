@@ -15,7 +15,8 @@ const getUser = async (res, username, client) => {
   const user = await User.findByUsername(username, client);
   if(!user) {
     await transaction.end(client);
-    return response.auth.userNotAuthenticated(res);
+    response.auth.userNotAuthenticated(res);
+    return false;
   } return user;
 };
 
@@ -27,8 +28,9 @@ const getUserDetails = async (req, res) => {
     const { username } = req.decodedToken;
 
     const user = await getUser(res, username, client);
-    console.log("Sending User Details:\n", user);
+    if(!user) return;
 
+    console.log("Sending User Details:\n", user);
     response.success(res, { body: user });
   } catch (err) {
     await transaction.end(client);
@@ -51,6 +53,8 @@ const editContactDetails = async (req, res) => {
     
     // Get user's data
     const user = await getUser(res, username, client);
+    if(!user) return;
+
     const hasNewEmail = email && email !== user.email;
     const hasNewMobile = mobile && mobile !== user.mobile;
 
@@ -73,10 +77,6 @@ const editContactDetails = async (req, res) => {
       newMobile = await User.updateMobile({mobile, username}, client);
       // send confirmarion sms and add code to table
     }
-
-    // NOTE:
-    // if user is present in confirmation table then confirmation is pending
-    // after confirmation is successful remove from confirmation table and insert to user activity
 
     if(hasNewEmail || hasNewMobile) {
       // Sign or update activity and commit
@@ -103,7 +103,9 @@ const editShippingDetails = async (req, res) => {
     const type = 'update_details';
 
     // Get user's data, update details and sign activity
-    await getUser(res, username, client);
+    const userExist = await getUser(res, username, client);
+    if(!userExist) return;
+
     const user = await User.updateAddress({ ...req.body, username: username }, client);
     await UserActivity.upsert({type, username}, client);
     

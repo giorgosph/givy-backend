@@ -9,7 +9,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-async function send() {
+async function send(code) {
   // Create a transporter using SMTP
 
   // Define the email options
@@ -17,7 +17,7 @@ async function send() {
     from: process.env.EMAIL,
     to: process.env.EMAIL_RECIPIENT,
     subject: "Test Email",
-    text: `This is a test email sent from Node.js using Nodemailer.`,
+    text: `This is a test email sent from Node.js using Nodemailer.\nConfirmation Code: ${code}`,
   };
 
   // Send the email

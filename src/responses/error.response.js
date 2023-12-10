@@ -1,5 +1,5 @@
-const generic = (res, status, message) => {
-  res.status(status || 500).send({ success: false, message: message || "Server Error" });
+const generic = (res, data) => {
+  res.status(data?.status || 500).send({ success: false, message: data?.message || "Server Error" });
 };
 
 module.exports = {
