@@ -47,7 +47,6 @@ const smsWithCode = async (req, res) => {
     await Confirmation.update({type: 'mobile', username, code: randToken, notes: 'resend'}, client);
     console.log(`Mobile Confirmation Code for ${username}: ${randToken}`); // TODO -> send confirmation sms
 
-
     transaction.commit(client);
     response.success.success(res, { body: { type: 'mobile' }});
   } catch (err) {

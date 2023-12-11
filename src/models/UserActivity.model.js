@@ -47,9 +47,8 @@ module.exports = class UserActivity {
     const date = new Date();
     
     await client.query(
-      `INSERT INTO ${U_ACTIV} (username, type, last_activity_date) 
-       VALUES ($1, $2, $3) 
-       ON CONFLICT (username, type) DO UPDATE SET last_activity_date = $3;`, 
+      `INSERT INTO ${U_ACTIV} (username, type, last_activity_date) VALUES ($1, $2, $3) 
+       ON CONFLICT (username, type) DO UPDATE SET last_activity_date=$3;`, 
       [data.username, data.type, date]
     );
   };

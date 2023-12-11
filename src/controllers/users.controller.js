@@ -74,7 +74,11 @@ const editContactDetails = async (req, res) => {
     if(hasNewMobile) {
       console.log("Updating mobile");
       newMobile = await User.updateMobile({mobile, username}, client);
-      // send confirmarion sms and add code to table
+
+      // Create random token and send confirmation sms
+      const randToken = genToken.random();
+      await Confirmation.upsert({type: 'mobile', username, code: randToken, notes: 'update mobile'}, client);
+      console.log(`Mobile Confirmation Code for ${username}: ${randToken}`); // TODO -> send confirmation sms
     }
 
     if(hasNewEmail || hasNewMobile) {

@@ -36,6 +36,16 @@ module.exports = class Confirmation {
     );
   };
 
+  static async upsert(data, client) {
+    const date = new Date();
+  
+    await client.query(`
+      INSERT INTO ${CONFIRM} (username, type, notes, code, sended_date) VALUES ($1, $2, $3, $4, $5)
+      ON CONFLICT (username, type) DO UPDATE SET notes=$3, code=$4, sended_date=$5;`,
+      [data.username, data.type, data?.notes, data.code, date]
+    );
+  };  
+
   static async update(data, client) {  
     const date = new Date();
     await client.query(
