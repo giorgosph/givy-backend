@@ -2,7 +2,7 @@ const User = require("../models/index").User;
 const UserActivity = require("../models/index").UserActivity;
 const Confirmation = require("../models/index").Confirmation;
 
-const response = require("../responses/index");
+const response = require("../responses");
 const transaction = require("../db/db").transaction;
 
 const emailer = require("../utils/helperFunctions/email");
@@ -15,7 +15,7 @@ const getUser = async (res, username, client) => {
   const user = await User.findByUsername(username, client);
   if(!user) {
     await transaction.end(client);
-    response.auth.userNotAuthenticated(res);
+    response.clientError.userNotAuthenticated(res);
     return false;
   } return user;
 };
@@ -31,11 +31,11 @@ const getUserDetails = async (req, res) => {
     if(!user) return;
 
     console.log("Sending User Details:\n", user);
-    response.success(res, { body: user });
+    response.success.success(res, { body: user });
   } catch (err) {
     await transaction.end(client);
     console.error("Error Getting User's Details:\n", err);
-    response.error.generic(res);
+    response.serverError.serverError(res);
   }
 };
 
@@ -43,11 +43,11 @@ const getUserDetails = async (req, res) => {
 /* ----------------------------------------------------------------- */
 
 const editContactDetails = async (req, res) => {
-  console.log(`Editing Contact Details`);
+  const { username } = req.decodedToken;
+  console.log(`Editing Contact Details for ${username}...`);
   const client = await transaction.start();    
   
   try {
-    const { username } = req.decodedToken;
     const { email, mobile } = req.body
     const type = 'update_details';
     
@@ -68,8 +68,7 @@ const editContactDetails = async (req, res) => {
       // Create random token and send confirmation email
       const randToken = genToken.random();
       await Confirmation.insert({type: 'email', username, code: randToken, notes: 'update email'}, client);
-      await emailer.send();
-      // TODO -> set User isConfirmaed to false
+      await emailer.send(randToken);
     }
 
     if(hasNewMobile) {
@@ -86,20 +85,20 @@ const editContactDetails = async (req, res) => {
     }else await transaction.end(client);
 
     console.log(`Sending response with email: ${newEmail} and mobile: ${newMobile}`);
-    response.success(res, { body: { contactDetails: { email: newEmail, mobile: newMobile }}});
+    response.success.success(res, { body: { contactDetails: { email: newEmail, mobile: newMobile }}});
   } catch (err) {
     await transaction.rollback(client);
     console.error("Error Updating User's Contact Details:\n", err);
-    response.error.generic(res);
+    response.serverError.serverError(res);
   }
 };
 
 const editShippingDetails = async (req, res) => {
-  console.log("Editing Shipping Details");
+  const { username } = req.decodedToken
+  console.log(`Editing Shipping Details for ${username}...`);
   const client = await transaction.start();
   
   try {
-    const { username } = req.decodedToken
     const type = 'update_details';
 
     // Get user's data, update details and sign activity
@@ -110,11 +109,11 @@ const editShippingDetails = async (req, res) => {
     await UserActivity.upsert({type, username}, client);
     
     await transaction.commit(client);
-    response.success(res, { body: { shippingDetails: user }});
+    response.success.success(res, { body: { shippingDetails: user }});
   } catch (err) {
     await transaction.rollback(client);
     console.error("Error Updating User's Shipping Details:\n", err);
-    response.error.generic(res);
+    response.serverError.serverError(res);
   }
 };
 

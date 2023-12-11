@@ -1,18 +1,9 @@
-const auth = require("./auth.response");
-const error = require("./error.response");
-
-const success = (res, data) => {
-  const message = "Success!";
-  res.status(200).json({ success: true, body: data?.body || null, message: data?.message || message });
-}
-
-const noData = (res) => {
-  res.status(204).json({});
-}
+const success = require("./success.response");
+const clientError = require("./clientError.response");
+const serverError = require("./serverError.response");
 
 module.exports = {
-  auth,
-  error,
   success,
-  noData,
+  clientError,
+  serverError,
 }

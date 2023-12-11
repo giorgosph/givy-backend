@@ -1,6 +1,6 @@
-const DrawAttenant = require("../models/index").DrawAttenant;
+const DrawAttenant = require("../models").DrawAttenant;
 
-const response = require("../responses/index");
+const response = require("../responses");
 const transaction = require("../db/db").transaction;
 
 /* ---------------------- Get User --------------------------- */
@@ -16,11 +16,11 @@ const register = async (req, res) => {
     const draw = await DrawAttenant.register({ drawId: req.body.drawId, username }, client);
 
     await transaction.commit(client);
-    response.success(res, { body: { drawId: draw.drawId } });
+    response.success.success(res, { body: { drawId: draw.drawId } });
   } catch (err) {
     await transaction.rollback(client);
     console.error("Error Adding Draw Attenant:\n", err);
-    response.error.generic(res);
+    response.serverError.serverError(res);
   }
 };
 

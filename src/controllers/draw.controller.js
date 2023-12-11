@@ -1,8 +1,8 @@
-const Draw = require("../models/index").Draw;
-const DrawItem = require("../models/index").DrawItem;
-const DrawAttenant = require("../models/index").DrawAttenant;
+const Draw = require("../models").Draw;
+const DrawItem = require("../models").DrawItem;
+const DrawAttenant = require("../models").DrawAttenant;
 
-const response = require("../responses/index");
+const response = require("../responses");
 const transaction = require("../db/db").transaction;
 
 /* ---------------- Get Draws ---------------- */
@@ -16,13 +16,13 @@ const getCurrentDraws = async (req, res) => {
 
     const draws = await Draw.getUpcomingDraws(client);
     await transaction.end(client);
-    if(!draws) return response.noData(res);
+    if(!draws) return response.success.noData(res);
 
-    response.success(res, { body: draws });
+    response.success.success(res, { body: draws });
   } catch (err) {
     console.error("Error Getting Current Draws:\n", err);
     await transaction.end(client);
-    response.error.generic(res);
+    response.serverError.serverError(res);
   }
 };
 
@@ -36,13 +36,13 @@ const getUserDraws = async (req, res) => {
     const draws = await DrawAttenant.findUpcomingByUsername(username, client); // opted in draws
     const wins = await DrawItem.findByWinner(username, client); // winning items
     await transaction.end(client);
-    if(draws.length == 0 && wins.length == 0) return response.noData(res);
+    if(draws.length == 0 && wins.length == 0) return response.success.noData(res);
 
-    response.success(res, { body: { draws, wins} });
+    response.success.success(res, { body: { draws, wins} });
   } catch (err) {
     console.error("Error Getting User Draws:\n", err);
     await transaction.end(client);
-    response.error.generic(res);
+    response.serverError.serverError(res);
   }
 };
 
@@ -58,12 +58,12 @@ const getDrawItems = async (req, res) => {
     const items = await DrawItem.findByDrawID(req.params.drawId, client);
     await transaction.end(client);
     
-    if(!items) return response.noData(res);
-    response.success(res, { body: items });
+    if(!items) return response.success.noData(res);
+    response.success.success(res, { body: items });
   } catch (error) {
     console.error("Error Getting Current Draws:\n", error);
     await transaction.end(client);
-    response.error.generic(res);
+    response.serverError.serverError(res);
   }
 };
 

@@ -13,7 +13,7 @@ function verifyToken(req, res, next) {
     } else response.auth.noPrivilages(res);
   } catch (err) {
     console.error("Error verifying token:\n", err.message);
-    response.error.generic(res);
+    response.serverError.serverError(res);
   }
 }
 
