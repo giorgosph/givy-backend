@@ -10,7 +10,7 @@ function verifyToken(req, res, next) {
     if (token) {
       req.decodedToken = token;
       next();
-    } else response.auth.noPrivilages(res);
+    } else response.clientError.noPrivilages(res);
   } catch (err) {
     console.error("Error verifying token:\n", err.message);
     response.serverError.serverError(res);
@@ -21,7 +21,7 @@ function verifyUserApproved(req, res, next) {
   if (req.decodedToken.review === "approved") {
     next();
   } else {
-    response.auth.noPrivilages(res);
+    response.clientError.noPrivilages(res);
   }
 }
 
@@ -30,7 +30,7 @@ function verifyUserRole(requiredRole) {
     if (req.decodedToken.role === requiredRole) {
       next();
     } else {
-      response.auth.noPrivilages(res);
+      response.clientError.noPrivilages(res);
     }
   };
 }
@@ -47,7 +47,7 @@ function verifyAll(requiredRoles) {
       req.decodedToken = token;
       next();
     } else {
-      response.auth.noPrivilages(res);
+      response.clientError.noPrivilages(res);
     }
   };
 }

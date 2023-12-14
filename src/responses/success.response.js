@@ -14,9 +14,9 @@ const noData = (res) => {
 
 const sendToken = (res, token, data) => {
   const message = `Logged in successfully`;
-  const token = `Bearer ${token}`;
-
-  res.status(data?.status || 201).json({ success: true, token, body: data?.body, message });
+  const fullToken = `Bearer ${token}`;
+  
+  res.status(data?.status || 201).json({ success: true, token: fullToken, body: data?.body, message });
 };
 
 module.exports = {

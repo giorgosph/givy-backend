@@ -19,7 +19,7 @@ const extractToken = (req) => {
     console.log("Decoded Token:\n", decodedToken);
     
     return decodedToken;
-  }else console.error("No Authorisation Header");
+  }else console.error("No Authorization Header");
 };
 
 module.exports = {

@@ -18,8 +18,17 @@ const noPrivilages = (res) => {
   res.status(403).send({ success: false, message });
 };
 
+/* --------------- Data related --------------- */
+
+const invalidData = (res) => {
+ const message = 'Invalid data';
+
+ res.status(422).send({ success: false, message });
+}
+
 module.exports = {
   userExists,
+  invalidData,
   noPrivilages,
   userNotAuthenticated,
 };

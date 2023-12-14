@@ -6,13 +6,13 @@ CREATE TYPE confirmations AS ENUM('email', 'mobile');
 CREATE TYPE item_categories AS ENUM('electronics', 'home', 'clothing', 'personal_care', 'vacation', 'learning');
 
 CREATE TABLE IF NOT EXISTS "users" (
-  "username" TEXT UNIQUE,
+  "username" TEXT UNIQUE, -- TODO -> filter username to add/remove a unique key infront of the original
   "first_name" TEXT,
   "last_name" TEXT,
   "email" TEXT UNIQUE NOT NULL,
   "password" TEXT NOT NULL,
   "paid_plan" plans DEFAULT 'basic',
-  "mobile" TEXT UNIQUE,
+  "mobile" INTEGER UNIQUE,
   "mobile_ext" INTEGER,
   "creation_date" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   "is_confirmed" BOOLEAN DEFAULT FALSE,

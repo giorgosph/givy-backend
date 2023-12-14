@@ -47,13 +47,13 @@ const register = async (req, res) => {
     }
 
     // Sign activities
-    await UserActivity.insert({ username, type: 'register' }, client);
     await UserActivity.insert({ username, type: 'login' }, client);
+    await UserActivity.insert({ username, type: 'register' }, client);
     
     // Send token and commit database changes
     const token = signToken(user);
     await transaction.commit(client);
-    response.success.sendToken(res, token, { body: { user, confirmed: { email: false, mobile: true }}});
+    response.success.sendToken(res, token, { body: { user, confirmed: { email: false, mobile: false }}});
     console.log("New User Created:\n", user);
   } catch (err) {
     // TODO -> create logging system
@@ -128,7 +128,7 @@ const confirmAccount = async (req, res) => {
     }
 
     await transaction.commit(client);
-    response.success.success(res);
+    response.success.success(res, { body: { confirm: type }});
   } catch (err) {
     console.error(`Error Confirming ${type} for ${username}:\n`, err);
     await transaction.rollback(client);

@@ -20,6 +20,7 @@ router.put("/details/shipping", verifyToken, users.editShippingDetails);
 
 /* ------------------------ Notification Routes ------------------------ */
 
+router.put("/phone/code", verifyToken, notify.smsWithCode);
 router.put("/email/code", verifyToken, notify.emailWithCode);
 
 module.exports = router;

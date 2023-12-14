@@ -51,6 +51,9 @@ const editContactDetails = async (req, res) => {
     const { email, mobile } = req.body
     const type = 'update_details';
     
+    // Filter Data: Email cannot be null
+    if(!email) return response.clientError.invalidData(res);
+
     // Get user's data
     const user = await getUser(res, username, client);
     if(!user) return;
@@ -58,11 +61,11 @@ const editContactDetails = async (req, res) => {
     const hasNewEmail = email && email !== user.email;
     const hasNewMobile = mobile && mobile !== user.mobile;
 
-    let newEmail = null;
-    let newMobile = null;
+    let newEmail = false;
+    let newMobile = false;
 
     if(hasNewEmail) {
-      console.log("Updating email");
+      console.log("Updating email...");
       newEmail = await User.updateEmail({email, username}, client);
 
       // Create random token and send confirmation email
@@ -72,7 +75,7 @@ const editContactDetails = async (req, res) => {
     }
 
     if(hasNewMobile) {
-      console.log("Updating mobile");
+      console.log("Updating mobile...");
       newMobile = await User.updateMobile({mobile, username}, client);
 
       // Create random token and send confirmation sms
@@ -85,8 +88,8 @@ const editContactDetails = async (req, res) => {
       // Sign or update activity and commit
       await UserActivity.upsert({type, username}, client);
       await transaction.commit(client);
-
-    }else await transaction.end(client);
+      
+    } else await transaction.end(client);
 
     console.log(`Sending response with email: ${newEmail} and mobile: ${newMobile}`);
     response.success.success(res, { body: { contactDetails: { email: newEmail, mobile: newMobile }}});

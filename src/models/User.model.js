@@ -107,7 +107,7 @@ module.exports = class User {
   }
 
   static async updateMobile(data, client) {
-    const mobile = await client.query(`UPDATE ${USERS} SET mobile=$1 WHERE username=$2 RETURNING mobile`, 
+    const mobile = await client.query(`UPDATE ${USERS} SET mobile=$1 WHERE username=$2 RETURNING mobile;`, 
       [data.mobile, data.username]
     );
 
