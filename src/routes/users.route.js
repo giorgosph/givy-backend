@@ -12,6 +12,7 @@ router.put("/login", auth.login);
 router.post("/register", auth.register);
 router.put("/forgot-password", auth.forgotPassword);
 router.delete("/confirm", verifyToken, auth.confirmAccount);
+router.put("/reset-password", verifyToken, auth.resetPassword);
 
 /* ------------------------ User Details Routes ------------------------ */
 

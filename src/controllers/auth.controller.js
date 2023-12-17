@@ -15,7 +15,7 @@ const compareKeys = require("../utils/helperFunctions/hash").compareKeys;
 /* ---------------------------------------------------------------- */
 
 const register = async (req, res) => {
-  console.log("Creating new User...");
+  console.log("Creating new User ...");
   const { username, email, password } = req.body;
   
   const client = await transaction.start();
@@ -64,7 +64,7 @@ const register = async (req, res) => {
 };
 
 const login = async (req, res) => {
-  console.log("Loging in User...");
+  console.log("Loging in User ...");
   const { username, password } = req.body;
   
   const client = await transaction.start();
@@ -111,7 +111,7 @@ const login = async (req, res) => {
 const confirmAccount = async (req, res) => {
   const { type } = req.body;
   const { username } = req.decodedToken;
-  console.log(`Confirming ${type} for ${username}...`);
+  console.log(`Confirming ${type} for ${username} ...`);
 
   const client = await transaction.start();
   
@@ -143,13 +143,13 @@ const confirmAccount = async (req, res) => {
 
 const forgotPassword = async (req, res) => {
   const { email, code, password } = req.body;
-  console.log(`Setting new password for ${email}...`);
+  console.log(`Setting new password for ${email} ...`);
   
   const client = await transaction.start();
   
   try {
     const type = 'forgot_password';
-    if(password !== req.body.confirmPassword) throw new Error("Error: Passwords do not match!");
+    if(password !== req.body.confirmPassword) throw new Error("Passwords do not match!");
 
     // Get User
     const user = await User.findByEmail(email, client);
@@ -191,9 +191,41 @@ const forgotPassword = async (req, res) => {
   }
 };
 
+const resetPassword = async (req, res) => {
+  const { username } = req.decodedToken;
+  console.log(`Resetting password for ${username} ...`);
+  
+  const client = await transaction.start();
+  
+  try {
+    const { password } = req.body;
+    const type = 'reset_password';
+
+    if(password !== req.body.confirmPassword) throw new Error("Passwords do not match!");
+
+    const user = await User.findByUsername(username, client);
+    if(!user) {
+      await transaction.end(client);
+      return response.clientError.userNotAuthenticated(res);
+    }
+
+    const hashedPassword = await hash(password); 
+    await User.updatePassword({ username, password: hashedPassword }, client); 
+    await UserActivity.upsert({ username, type }, client); 
+
+    await transaction.commit(client);
+    response.success.success(res, { body: { pass: true }});
+  } catch (err) {
+    console.error(`Error Resetting password for ${username}:\n`, err);
+    await transaction.rollback(client);
+    response.serverError.serverError(res);
+  }
+}
+
 module.exports = {
   login,
   register,
+  resetPassword,
   forgotPassword,
   confirmAccount,
 }
