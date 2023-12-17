@@ -11,30 +11,24 @@ const genToken = require("../utils/helperFunctions/token");
 /* ---------------------- Get User --------------------------- */
 /* ----------------------------------------------------------- */
 
-const getUser = async (res, username, client) => {
-  const user = await User.findByUsername(username, client);
-  if(!user) {
-    await transaction.end(client);
-    response.clientError.userNotAuthenticated(res);
-    return false;
-  } return user;
-};
-
 const getUserDetails = async (req, res) => {
-  console.log("Getting User Details");
+  const { username } = req.decodedToken;
+  console.log(`Getting User Details for ${username}`);
+
   const client = await transaction.start();
 
   try {
-    const { username } = req.decodedToken;
-
-    const user = await getUser(res, username, client);
-    if(!user) return;
+    const user = await User.findByUsername(res, username, client);
+    if(!user) {
+      await transaction.end(client);
+      return response.clientError.userNotAuthenticated(res);
+    }
 
     console.log("Sending User Details:\n", user);
     response.success.success(res, { body: user });
   } catch (err) {
     await transaction.end(client);
-    console.error("Error Getting User's Details:\n", err);
+    console.error(`Error Getting User's Details for ${username}:\n`, err);
     response.serverError.serverError(res);
   }
 };
@@ -55,8 +49,11 @@ const editContactDetails = async (req, res) => {
     if(!email) return response.clientError.invalidData(res);
 
     // Get user's data
-    const user = await getUser(res, username, client);
-    if(!user) return;
+    const user = await User.findByUsername(res, username, client);
+    if(!user) {
+      await transaction.end(client);
+      return response.clientError.userNotAuthenticated(res);
+    }
 
     const hasNewEmail = email && email !== user.email;
     const hasNewMobile = mobile && mobile !== user.mobile;
@@ -95,7 +92,7 @@ const editContactDetails = async (req, res) => {
     response.success.success(res, { body: { contactDetails: { email: newEmail, mobile: newMobile }}});
   } catch (err) {
     await transaction.rollback(client);
-    console.error("Error Updating User's Contact Details:\n", err);
+    console.error(`Error Updating ${username}'s Contact Details:\n`, err);
     response.serverError.serverError(res);
   }
 };
@@ -109,8 +106,11 @@ const editShippingDetails = async (req, res) => {
     const type = 'update_details';
 
     // Get user's data, update details and sign activity
-    const userExist = await getUser(res, username, client);
-    if(!userExist) return;
+    const userExists = await User.findByUsername(res, username, client);
+    if(!userExists) {
+      await transaction.end(client);
+      return response.clientError.userNotAuthenticated(res);
+    }
 
     const user = await User.updateAddress({ ...req.body, username: username }, client);
     await UserActivity.upsert({type, username}, client);
@@ -119,13 +119,12 @@ const editShippingDetails = async (req, res) => {
     response.success.success(res, { body: { shippingDetails: user }});
   } catch (err) {
     await transaction.rollback(client);
-    console.error("Error Updating User's Shipping Details:\n", err);
+    console.error(`Error Updating ${username}'s Shipping Details:\n`, err);
     response.serverError.serverError(res);
   }
 };
 
 module.exports = {
-  getUser,
   getUserDetails,
   editContactDetails,
   editShippingDetails,

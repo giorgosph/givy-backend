@@ -6,10 +6,10 @@ const userExists = (res, type) => {
   res.status(409).json({ success: false, body: { type }, message });
 };
 
-const userNotAuthenticated = (res) => {
+const userNotAuthenticated = (res, data) => {
   const message = `Wrong credentials!`;
 
-  res.status(401).json({ success: false, message });
+  res.status(401).json({ success: false, body: data?.body , message });
 };
 
 const noPrivilages = (res) => {

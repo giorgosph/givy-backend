@@ -87,6 +87,8 @@ const login = async (req, res) => {
     
     // Sign activity
     await UserActivity.update({username, type: 'login'}, client);
+
+    // Check if user has pending confirmations
     const email = await Confirmation.findUserWithType({ username: user.username, type: 'email' }, client);
     const mobile = await Confirmation.findUserWithType({ username: user.username, type: 'mobile' }, client);
 
@@ -116,7 +118,7 @@ const confirmAccount = async (req, res) => {
   try {
     // Get User's confirmation info
     const user = await Confirmation.findUserWithType({ username, type}, client);
-    if(!user) throw new Error('User tries to confirm email address without confirmation code');
+    if(!user) throw new Error(`User tries to confirm ${type} without confirmation code`);
 
     // Check if code provided is valid
     if(user.code == req.body.code) {
@@ -136,8 +138,62 @@ const confirmAccount = async (req, res) => {
   }
 };
 
+/* ----------------------- Password Related ----------------------- */
+/* ---------------------------------------------------------------- */
+
+const forgotPassword = async (req, res) => {
+  const { email, code, password } = req.body;
+  console.log(`Setting new password for ${email}...`);
+  
+  const client = await transaction.start();
+  
+  try {
+    const type = 'forgot_password';
+    if(password !== req.body.confirmPassword) throw new Error("Error: Passwords do not match!");
+
+    // Get User
+    const user = await User.findByEmail(email, client);
+    if(!user) {
+      await transaction.end(client);
+      return response.clientError.userNotAuthenticated(res);
+    }
+
+    const username = user.username;
+
+    // Get User's confirmation info
+    const userCode = await Confirmation.findUserWithType({ username, type}, client);
+    if(!userCode) throw new Error(`User tries to set new password without confirmation code`);
+
+    // Check if code provided is valid
+    if(userCode.code == code) {
+      const hashedPassword = await hash(password); // Encrypt password
+
+      await Confirmation.delete({ username, type }, client); // Delete the confirmation entry
+      await User.updatePassword({ username, password: hashedPassword }, client); // Update the password
+      await UserActivity.upsert({ username, type: 'reset_password' }, client); // Sign the activity
+    } else {
+      transaction.end(client);
+      return response.clientError.userNotAuthenticated(res);
+    }
+
+    // Check if user has pending confirmations
+    const mobile = await Confirmation.findUserWithType({ username: user.username, type: 'mobile' }, client);
+    const emailExist = await Confirmation.findUserWithType({ username: user.username, type: 'email' }, client);
+  
+    // Send token and commit database changes
+    const token = signToken(user);
+    await transaction.commit(client);
+    response.success.sendToken(res, token, { body: { user, pass: true, confirmed: { email: !emailExist, mobile: !mobile }}});
+  } catch (err) {
+    console.error(`Error Setting new password for ${email}:\n`, err);
+    await transaction.rollback(client);
+    response.serverError.serverError(res);
+  }
+};
+
 module.exports = {
-  register,
   login,
+  register,
+  forgotPassword,
   confirmAccount,
 }

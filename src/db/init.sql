@@ -2,7 +2,7 @@ CREATE TYPE genders AS ENUM('male', 'female', 'other');
 CREATE TYPE plans AS ENUM('basic', 'premium', 'platinum');
 CREATE TYPE roles AS ENUM('client', 'admin');
 CREATE TYPE activities AS ENUM('register', 'login', 'open_app', 'email_confirmation', 'mobile_confirmation', 'reset_password', 'update_details');
-CREATE TYPE confirmations AS ENUM('email', 'mobile');
+CREATE TYPE confirmations AS ENUM('email', 'mobile', 'forgot_password');
 CREATE TYPE item_categories AS ENUM('electronics', 'home', 'clothing', 'personal_care', 'vacation', 'learning');
 
 CREATE TABLE IF NOT EXISTS "users" (
@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS "users" (
   "email" TEXT UNIQUE NOT NULL,
   "password" TEXT NOT NULL,
   "paid_plan" plans DEFAULT 'basic',
-  "mobile" INTEGER UNIQUE,
+  "mobile" TEXT UNIQUE,
   "mobile_ext" INTEGER,
   "creation_date" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   "is_confirmed" BOOLEAN DEFAULT FALSE,

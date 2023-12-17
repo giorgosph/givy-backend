@@ -20,14 +20,14 @@ module.exports = class User {
     this.address2 = data.address_line_2;
     this.postalCode = data.postal_code;
     this.role = data.role;
-  }
+  };
 
   static async getAll(client) {
     const allUsers = await client.query(`SELECT * FROM ${USERS};`);
 
     const users = allUsers.rows.map((user) => new User(user));
     return users;
-  }
+  };
 
   /* ----------------- Find User ----------------- */
   /* --------------------------------------------- */
@@ -43,28 +43,28 @@ module.exports = class User {
     // if (user) return {exist: true, type: 'mobile'};
 
     return false;
-  }
+  };
 
   static async findByEmail(email, client) {
     const user = await client.query(`SELECT * FROM ${USERS} WHERE email = $1;`, [email]);
 
     if (user.rows.length) return new User(user.rows[0]);
     else return false;
-  }
+  };
 
   static async findByUsername(username, client) {
     const user = await client.query(`SELECT * FROM ${USERS} WHERE username = $1;`, [username]);
 
     if (user.rows.length) return new User(user.rows[0]);
     else return false;
-  }
+  };
 
   static async findByMobile(mobile, client) {
     const user = await client.query(`SELECT * FROM ${USERS} WHERE mobile = $1;`, [mobile]);
 
     if (user.rows.length) return new User(user.rows[0]);
     else return false;
-  }
+  };
 
   /* ----------------- Auth User ----------------- */
   /* --------------------------------------------- */
@@ -93,7 +93,7 @@ module.exports = class User {
 
     if (user.rows.length) return new User(user.rows[0]);
     else return false;
-  }
+  };
 
   /* ----------------- Update User ----------------- */
   /* ----------------------------------------------- */
@@ -104,7 +104,7 @@ module.exports = class User {
     );
 
     return email.rows[0].email
-  }
+  };
 
   static async updateMobile(data, client) {
     const mobile = await client.query(`UPDATE ${USERS} SET mobile=$1 WHERE username=$2 RETURNING mobile;`, 
@@ -112,7 +112,7 @@ module.exports = class User {
     );
 
     return mobile.rows[0].mobile
-  }
+  };
 
   static async updateAddress(data, client) {
     const user = await client.query(`UPDATE ${USERS} SET country=$1, city=$2, address_line_1=$3, 
@@ -122,14 +122,10 @@ module.exports = class User {
 
     if (user.rows.length) return new User(user.rows[0]);
     else return false;
-  }
-
-  static async updatePassword(userInfo, password, client) {
-    const res = await client.query(
-      `UPDATE ${USERS} SET password=$1 WHERE username=$2 OR email=$2`,
-      [password, userInfo]
-    );
-
-    return res.rowCount;
   };
+
+  static async updatePassword(data, client) {
+    await client.query(`UPDATE ${USERS} SET password=$1 WHERE username=$2`, [data.password, data.username]);
+  };
+  
 };
