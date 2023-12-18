@@ -3,9 +3,12 @@ const DRAW = require("../utils/constants/tables").DRAW;
 module.exports = class Draw {
   constructor(data) {
     this.id = data.id;
+    this.plan = data.plan;
     this.title = data.title;
     this.brief = data.brief;
-    this.type = data.type;
+    this.country = data.country;
+    this.location = data.location;
+    this.category = data.category;
     this.imagePath = data.image_path;
     this.openingDate = data.opening_date;
     this.creationDate = data.creation_date;

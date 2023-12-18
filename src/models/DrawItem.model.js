@@ -5,7 +5,6 @@ module.exports = class DrawItem {
     this.id = data.id;
     this.drawId = data.draw_id;
     this.title = data.title;
-    this.category = data.category;
     this.description = data.description;
     this.imagePath = data.image_path;
     this.brief = data.brief;
