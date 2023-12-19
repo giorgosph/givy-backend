@@ -7,6 +7,8 @@ const transaction = require("../db/db").transaction;
 
 const emailer = require("../utils/helperFunctions/email");
 const genToken = require("../utils/helperFunctions/token");
+const validator = require("../utils/helperFunctions/dataValidation");
+
 const hash = require("../utils/helperFunctions/hash").encrypt;
 const signToken = require("../utils/helperFunctions/jwt").signToken;
 const compareKeys = require("../utils/helperFunctions/hash").compareKeys;
@@ -17,10 +19,14 @@ const compareKeys = require("../utils/helperFunctions/hash").compareKeys;
 const register = async (req, res) => {
   console.log("Creating new User ...");
   const { username, email, password } = req.body;
-  
+
   const client = await transaction.start();
   
   try {
+    // Validate data
+    console.log("Req Body: " + JSON.stringify(req.body));
+    validator.registerValidator(req.body);
+
     // Check if the user's details are already registered
     const userExists = await User.findUser({ username, email }, client);
     if (userExists?.exist) {
@@ -70,6 +76,9 @@ const login = async (req, res) => {
   const client = await transaction.start();
   
   try {
+    // Validate data
+    validator.loginValidator(username, password);
+
     // Check if the user exists
     let user = await User.findByUsername(username, client); // by username
     if(!user) user = await User.findByEmail(username, client); // by email
@@ -116,6 +125,9 @@ const confirmAccount = async (req, res) => {
   const client = await transaction.start();
   
   try {
+    // Validate data
+    validator.confirmAccountValidator(username, type);
+
     // Get User's confirmation info
     const user = await Confirmation.findUserWithType({ username, type}, client);
     if(!user) throw new Error(`User tries to confirm ${type} without confirmation code`);
@@ -148,6 +160,8 @@ const forgotPassword = async (req, res) => {
   const client = await transaction.start();
   
   try {
+    validator.loginValidator(email, password);
+
     const type = 'forgot_password';
     if(password !== req.body.confirmPassword) throw new Error("Passwords do not match!");
 
@@ -200,6 +214,8 @@ const resetPassword = async (req, res) => {
   try {
     const { password } = req.body;
     const type = 'reset_password';
+
+    validator.loginValidator(username, password);
 
     if(password !== req.body.confirmPassword) throw new Error("Passwords do not match!");
 

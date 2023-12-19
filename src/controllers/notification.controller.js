@@ -6,6 +6,7 @@ const transaction = require("../db/db").transaction;
 
 const emailer = require("../utils/helperFunctions/email");
 const genToken = require("../utils/helperFunctions/token");
+const validator = require("../utils/helperFunctions/dataValidation");
 
 /* ------------------- Confirmations ------------------- */
 /* ----------------------------------------------------- */
@@ -17,7 +18,9 @@ const emailWithCode = async (req, res) => {
   const client = await transaction.start();
 
   try {
-    const user = await User.findByUsername(res, username, client);
+    validator.usernameValidator(username);
+
+    const user = await User.findByUsername(username, client);
     if(!user) {
       await transaction.end(client);
       return response.clientError.userNotAuthenticated(res, { body: { type: 'Email' }});
@@ -43,7 +46,9 @@ const smsWithCode = async (req, res) => {
   const client = await transaction.start();
 
   try {
-    const user = await User.findByUsername(res, username, client);
+    validator.usernameValidator(username);
+
+    const user = await User.findByUsername(username, client);
     if(!user) {
       await transaction.end(client);
       return response.clientError.userNotAuthenticated(res, { body: { type: 'SMS' }});
@@ -69,6 +74,8 @@ const emailForgotPassword = async (req, res) => {
   const client = await transaction.start();
 
   try {
+    validator.emailValidator(email);
+    
     const user = await User.findByEmail(email, client);
     if(!user) {
       await transaction.end(client);

@@ -7,6 +7,7 @@ const transaction = require("../db/db").transaction;
 
 const emailer = require("../utils/helperFunctions/email");
 const genToken = require("../utils/helperFunctions/token");
+const validator = require("../utils/helperFunctions/dataValidation");
 
 /* ---------------------- Get User --------------------------- */
 /* ----------------------------------------------------------- */
@@ -18,7 +19,9 @@ const getUserDetails = async (req, res) => {
   const client = await transaction.start();
 
   try {
-    const user = await User.findByUsername(res, username, client);
+    validator.usernameValidator(username);
+
+    const user = await User.findByUsername(username, client);
     if(!user) {
       await transaction.end(client);
       return response.clientError.userNotAuthenticated(res);
@@ -39,17 +42,21 @@ const getUserDetails = async (req, res) => {
 const editContactDetails = async (req, res) => {
   const { username } = req.decodedToken;
   console.log(`Editing Contact Details for ${username}...`);
+
   const client = await transaction.start();    
   
   try {
     const { email, mobile } = req.body
     const type = 'update_details';
     
+    validator.emailValidator(email);
+    validator.confirmAccountValidator(username, mobile);
+
     // Filter Data: Email cannot be null
     if(!email) return response.clientError.invalidData(res);
 
     // Get user's data
-    const user = await User.findByUsername(res, username, client);
+    const user = await User.findByUsername(username, client);
     if(!user) {
       await transaction.end(client);
       return response.clientError.userNotAuthenticated(res);
@@ -105,8 +112,10 @@ const editShippingDetails = async (req, res) => {
   try {
     const type = 'update_details';
 
+    validator.shippingDetailsValidator(username, req.body);
+    
     // Get user's data, update details and sign activity
-    const userExists = await User.findByUsername(res, username, client);
+    const userExists = await User.findByUsername(username, client);
     if(!userExists) {
       await transaction.end(client);
       return response.clientError.userNotAuthenticated(res);

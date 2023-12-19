@@ -5,15 +5,16 @@ const DrawAttenant = require("../models").DrawAttenant;
 const response = require("../responses");
 const transaction = require("../db/db").transaction;
 
+const validator = require("../utils/helperFunctions/dataValidation");
+
 /* ---------------- Get Draws ---------------- */
 /* ------------------------------------------- */
 
 const getCurrentDraws = async (req, res) => {
   console.log("Getting current draws...");
-
+  const client = await transaction.start();
+  
   try {
-    const client = await transaction.start();
-
     const draws = await Draw.getUpcomingDraws(client);
     await transaction.end(client);
     if(!draws) return response.success.noData(res);
@@ -27,11 +28,12 @@ const getCurrentDraws = async (req, res) => {
 };
 
 const getUserDraws = async (req, res) => {
-  console.log("Getting user draws...");
+  const { username } = req.decodedToken;
+  const client = await transaction.start();
+  console.log(`Getting user draws for ${username} ...`);
 
   try {
-    const { username } = req.decodedToken;
-    const client = await transaction.start();
+    validator.usernameValidator(username);
 
     const draws = await DrawAttenant.findUpcomingByUsername(username, client); // opted in draws
     const wins = await DrawItem.findByWinner(username, client); // winning items
@@ -40,7 +42,7 @@ const getUserDraws = async (req, res) => {
 
     response.success.success(res, { body: { draws, wins} });
   } catch (err) {
-    console.error("Error Getting User Draws:\n", err);
+    console.error(`Error Getting User Draws for ${username}:\n`, err);
     await transaction.end(client);
     response.serverError.serverError(res);
   }
@@ -51,9 +53,10 @@ const getUserDraws = async (req, res) => {
 
 const getDrawItems = async (req, res) => {
   console.log("Getting items for draw...");
+  const client = await transaction.start();
 
   try {
-    const client = await transaction.start();
+    validator.generalValidator(req.params.drawId);
 
     const items = await DrawItem.findByDrawID(req.params.drawId, client);
     await transaction.end(client);
@@ -68,7 +71,7 @@ const getDrawItems = async (req, res) => {
 };
 
 module.exports = {
-  getCurrentDraws,
   getUserDraws,
   getDrawItems,
+  getCurrentDraws,
 }
