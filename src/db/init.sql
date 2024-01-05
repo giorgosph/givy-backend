@@ -3,7 +3,7 @@ CREATE TYPE plans AS ENUM('basic', 'premium', 'platinum');
 CREATE TYPE roles AS ENUM('client', 'admin');
 CREATE TYPE activities AS ENUM('register', 'login', 'open_app', 'email_confirmation', 'mobile_confirmation', 'reset_password', 'update_details');
 CREATE TYPE confirmations AS ENUM('email', 'mobile', 'forgot_password');
-CREATE TYPE draw_location AS ENUM('any', 'london', 'reading'); -- When expanded can be fetched from an external database ??
+CREATE TYPE draw_location AS ENUM('any', 'london', 'reading', 'surrey', 'southampton'); -- When expanded can be fetched from an external database ??
 CREATE TYPE draw_categories AS ENUM('general', 'electronics', 'home', 'clothing', 'personal_care', 'vacation', 'learning', 'gaming', 'stationery', 'hospitality');
 
 CREATE TABLE IF NOT EXISTS "users" (
@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS "draw" (
   "image_path" TEXT,
   "country" TEXT, -- Not null when applicaiton will be used in different countries
   "location" draw_location DEFAULT 'any',
-  "category" item_categories DEFAULT 'general', -- general category may be removed, also in future may add sub categories or many categories for one draw (ex. clothing-outdoor)
+  "category" draw_categories DEFAULT 'general', -- general category may be removed, also in future may add sub categories or many categories for one draw (ex. clothing-outdoor)
   "opening_date" TIMESTAMP NOT NULL,
   "creation_date" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   "closing_date" TIMESTAMP NOT NULL,
