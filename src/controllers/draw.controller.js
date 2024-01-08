@@ -52,13 +52,14 @@ const getUserDraws = async (req, res) => {
 /* ------------------------------------------- */
 
 const getDrawItems = async (req, res) => {
-  console.log("Getting items for draw...");
+  const drawId = req.params.drawId;
+  console.log(`Getting items for draw ${drawId} ...`);
   const client = await transaction.start();
 
   try {
-    validator.generalValidator(req.params.drawId);
+    validator.generalValidator(drawId);
 
-    const items = await DrawItem.findByDrawID(req.params.drawId, client);
+    const items = await DrawItem.findByDrawID(drawId, client);
     await transaction.end(client);
     
     if(!items) return response.success.noData(res);

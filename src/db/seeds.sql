@@ -2,7 +2,11 @@ INSERT INTO "users" ("username", "first_name", "last_name", "email", "password",
 VALUES
   ('john', 'John', 'Doe', 'john@example.com', '$2b$10$99Y4iROjhjrWOIE1XdUhDuJ6y232wQjxxDmvjk03egan5vryXfjyK', 'basic', '1234567890', 357, TRUE, 'male', 'USA', 'New York', '123 Main St', NULL, '10001', 'admin'),
   ('jane', 'Jane', 'Smith', 'jane@example.com', '$2b$10$99Y4iROjhjrWOIE1XdUhDuJ6y232wQjxxDmvjk03egan5vryXfjyK', 'basic', '9876543210', 357, TRUE, 'female', 'Canada', 'Toronto', '456 Elm St', 'Apt 102', 'M1M1M1', 'client'),
-  ('sam', 'Sam', 'Jackson', 'sam@example.com', '$2b$10$99Y4iROjhjrWOIE1XdUhDuJ6y232wQjxxDmvjk03egan5vryXfjyK', 'basic', '5556667777', 357, FALSE, 'other', 'UK', 'London', '789 Oak St', NULL, 'SW1A 1AA', 'client');
+  ('sam', 'Sam', 'Jackson', 'sam@example.com', '$2b$10$99Y4iROjhjrWOIE1XdUhDuJ6y232wQjxxDmvjk03egan5vryXfjyK', 'basic', '5556667777', 357, FALSE, 'other', 'UK', 'London', '789 Oak St', NULL, 'SW1A 1AA', 'client'),
+  ('gph', 'Sam', 'Jackson', 'gph@example.com', '$2b$10$99Y4iROjhjrWOIE1XdUhDuJ6y232wQjxxDmvjk03egan5vryXfjyK', 'basic', '5556667776', 357, FALSE, 'other', 'UK', 'London', '789 Oak St', NULL, 'SW1A 1AA', 'client'),
+  ('gg', 'Sam', 'Jackson', 'gg@example.com', '$2b$10$99Y4iROjhjrWOIE1XdUhDuJ6y232wQjxxDmvjk03egan5vryXfjyK', 'basic', '5556667775', 357, FALSE, 'other', 'UK', 'London', '789 Oak St', NULL, 'SW1A 1AA', 'client'),
+  ('mamas', 'Sam', 'Jackson', 'mamas@example.com', '$2b$10$99Y4iROjhjrWOIE1XdUhDuJ6y232wQjxxDmvjk03egan5vryXfjyK', 'basic', '5556667774', 357, FALSE, 'other', 'UK', 'London', '789 Oak St', NULL, 'SW1A 1AA', 'client'),
+  ('mamas11', 'Sam', 'Jackson', 'mamas11@example.com', '$2b$10$99Y4iROjhjrWOIE1XdUhDuJ6y232wQjxxDmvjk03egan5vryXfjyK', 'basic', '5556667773', 357, FALSE, 'other', 'UK', 'London', '789 Oak St', NULL, 'SW1A 1AA', 'client');
 
 INSERT INTO "draw" ("title", "image_path", "opening_date", "closing_date", "country", "location", "category")
 VALUES
@@ -14,8 +18,9 @@ VALUES
   ('Winter Fashion Challenge', 'https://example.com/image3.jpg', '2024-01-08', '2024-01-30', 'Canada', 'reading', 'clothing'),
   ('Home Renovation Sweepstakes', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdf_EUfTFmeG2l5SOGWC3MgwO43OCRlxOexuxTJP_yOw&s', '2024-01-02', '2024-01-22', 'USA', 'reading', 'home'),
   ('Healthy Living Raffle', 'https://i.pinimg.com/236x/c0/cb/1e/c0cb1eca075ae50f27bb1079c573a181.jpg', '2024-01-06', '2024-01-28', 'Australia', 'southampton', 'personal_care'),
-  ('Adventure Getaway Draw', 'https://burst.shopifycdn.com/photos/seaweed-washed-up-on-beach.jpg?width=1000&format=pjpg&exif=0&iptc=0', '2024-01-07', '2024-01-27', 'France', 'reading', 'vacation');
-  
+  ('Adventure Getaway Draw', 'https://burst.shopifycdn.com/photos/seaweed-washed-up-on-beach.jpg?width=1000&format=pjpg&exif=0&iptc=0', '2024-01-07', '2024-01-27', 'France', 'reading', 'vacation'),
+  ('Spring Photography Contest', 'https://example.com/image4.jpg', NOW(), NOW() + INTERVAL '5 minutes', 'USA', 'london', 'electronics'),
+  ('Summer Cooking Challenge', 'https://example.com/image5.jpg', NOW(), NOW() + INTERVAL '15 minutes', 'Canada', 'reading', 'home');
 
 INSERT INTO "draw_item" ("draw_id", "title", "description", "brief", "price", "winner")
 VALUES
@@ -34,4 +39,17 @@ VALUES
   (7, 'Fitness Tracker', 'Track your fitness goals and stay healthy', 'Monitor activities and health metrics', 80, ''),
   (7, 'Healthy Recipe Book', 'Collection of nutritious recipes for a balanced lifestyle', 'Cook healthy meals easily', 25, ''),
   (8, 'Culinary Class Retreat', 'Join a culinary retreat for a gastronomic experience', 'Learn from expert chefs in a scenic location', 250, ''),
-  (8, 'Yoga & Meditation Retreat', 'Relax and rejuvenate with yoga and meditation sessions', 'Find inner peace in a serene environment', 150, '');
+  (8, 'Yoga & Meditation Retreat', 'Relax and rejuvenate with yoga and meditation sessions', 'Find inner peace in a serene environment', 150, ''),
+  (9, 'Thermal Underwear Set', 'Comfortable and insulated underwear for cold weather', 'Stay cozy during outdoor activities', 60, ''),
+  (9, 'Fitness Tracker', 'Track your fitness goals and stay healthy', 'Monitor activities and health metrics', 80, ''),
+  (9, 'Healthy Recipe Book', 'Collection of nutritious recipes for a balanced lifestyle', 'Cook healthy meals easily', 25, ''),
+  (10, 'Culinary Class Retreat', 'Join a culinary retreat for a gastronomic experience', 'Learn from expert chefs in a scenic location', 250, ''),
+  (10, 'Yoga & Meditation Retreat', 'Relax and rejuvenate with yoga and meditation sessions', 'Find inner peace in a serene environment', 150, ''),
+  (11, 'Thermal Underwear Set', 'Comfortable and insulated underwear for cold weather', 'Stay cozy during outdoor activities', 60, ''),
+  (11, 'Fitness Tracker', 'Track your fitness goals and stay healthy', 'Monitor activities and health metrics', 80, ''),
+  (11, 'Healthy Recipe Book', 'Collection of nutritious recipes for a balanced lifestyle', 'Cook healthy meals easily', 25, '');
+
+INSERT INTO "draw_attenant" ("draw_id", "username")
+  SELECT 9, "username" FROM "users";
+INSERT INTO "draw_attenant" ("draw_id", "username")
+  SELECT 10, "username" FROM "users";

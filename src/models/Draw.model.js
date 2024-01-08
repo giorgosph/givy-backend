@@ -28,4 +28,11 @@ module.exports = class Draw {
     const draws = allDraws.rows.map((draw) => new Draw(draw));
     return draws;
   }
+
+  static async getUpcomingDrawsUnder4Hours(client) {
+    const allDraws = await client.query(`SELECT * FROM ${DRAW} WHERE closing_date <= CURRENT_TIMESTAMP + interval '4 hours' AND closing_date > CURRENT_TIMESTAMP;`);
+
+    const draws = allDraws.rows.map((draw) => new Draw(draw));
+    return draws;
+  }
 };

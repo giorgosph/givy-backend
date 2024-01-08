@@ -17,22 +17,39 @@ module.exports = class DrawItem {
 
     const items = allItems.rows.map((item) => new DrawItem(item));
     return items;
-  }
+  };
 
   /* ----------------- Finders ----------------- */
   /* ------------------------------------------- */  
 
   static async findByDrawID(drawId, client) {
-    const allItems = await client.query(`SELECT * FROM ${D_ITEM} WHERE draw_id=$1;`, [drawId]);
+    const allItems = await client.query(`SELECT * FROM ${D_ITEM} WHERE draw_id=$1 ORDER BY price DESC;`, [drawId]);
 
-    const item = allItems.rows.map((item) => new DrawItem(item));
-    return item;
-  }  
+    const items = allItems.rows.map((item) => new DrawItem(item));
+    return items;
+  };  
+
+  static async findByDrawIDSortByPrice(drawId, client) {
+    const allItems = await client.query(`SELECT * FROM ${D_ITEM} WHERE draw_id=$1 ORDER BY price ASC;`, [drawId]);
+
+    const items = allItems.rows.map((item) => new DrawItem(item));
+    return items;
+  };  
 
   static async findByWinner(username, client) {
     const allItems = await client.query(`SELECT * FROM ${D_ITEM} WHERE winner=$1;`, [username]);
 
-    const item = allItems.rows.map((item) => new DrawItem(item));
-    return item;
-  }
+    const items = allItems.rows.map((item) => new DrawItem(item));
+    return items;
+  };
+
+  /* ----------------- Updates ----------------- */
+  /* ------------------------------------------- */  
+
+  static async setWinner(data, client) {
+    await client.query(
+      `UPDATE ${D_ITEM} SET winner=$1 WHERE draw_id=$2 AND id=$3;`, 
+      [data.username, data.drawId, data.id]
+    );
+  };
 };

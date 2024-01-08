@@ -18,7 +18,7 @@ module.exports = class DrawAttenant {
   /* ------------------------------------------- */
 
   static async findByDraw(drawId, client) {
-    const allUsers = await client.query(`SELECT * FROM ${D_ATTENANT} WHERE draw_id = $1;`, [drawId]);
+    const allUsers = await client.query(`SELECT username FROM ${D_ATTENANT} WHERE draw_id = $1;`, [drawId]);
 
     const users = allUsers.rows.map((user) => new DrawAttenant(user));
     return users;
