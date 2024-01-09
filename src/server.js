@@ -29,9 +29,9 @@ app.use(express.json());
 app.use(`${apiRoute}/users`, users);
 app.use(`${apiRoute}/draws`, draws);
 
-// Set up scheduler to check for upcoming draws 
-// cron.schedule('0 */4 * * *', checkUpcomingDraws);
-cron.schedule('*/2 * * * *', checkUpcomingDraws);
+// Set up scheduler to check for upcoming draws every 4 hours
+cron.schedule('0 */4 * * *', checkUpcomingDraws);
+// cron.schedule('*/2 * * * *', checkUpcomingDraws); // (every 2 min) Remove after testing 
 
 // Connect WebSocket to server
 ws.connect(wss);

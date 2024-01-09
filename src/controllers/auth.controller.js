@@ -13,13 +13,16 @@ const hash = require("../utils/helperFunctions/hash").encrypt;
 const signToken = require("../utils/helperFunctions/jwt").signToken;
 const compareKeys = require("../utils/helperFunctions/hash").compareKeys;
 
+require("dotenv").config();
+
 /* ------------------------ Log In/Sign Up ------------------------ */
 /* ---------------------------------------------------------------- */
 
 const register = async (req, res) => {
   console.log("Creating new User ...");
   const { username, email, password } = req.body;
-
+  const usernamePrefix = `${process.env.USERNAME_PREFIX}${username}`;
+  
   const client = await transaction.start();
   
   try {
@@ -28,7 +31,7 @@ const register = async (req, res) => {
     validator.registerValidator(req.body);
 
     // Check if the user's details are already registered
-    const userExists = await User.findUser({ username, email }, client);
+    const userExists = await User.findUser({ username: usernamePrefix, email }, client);
     if (userExists?.exist) {
       await transaction.end(client);
       return response.clientError.userExists(res, userExists.type);
@@ -42,19 +45,19 @@ const register = async (req, res) => {
     
     // Send confirmation email
     const randToken = genToken.random();
-    await Confirmation.insert({type: 'email', username, code: randToken, notes: 'register'}, client);
+    await Confirmation.insert({type: 'email', username: usernamePrefix, code: randToken, notes: 'register'}, client);
     await emailer.send(randToken);
 
     // Send confirmation sms
     if(user.mobile) {
       const randToken = genToken.random();
-      await Confirmation.insert({type: 'mobile', username, code: randToken, notes: 'register'}, client);
-      console.log(`Mobile Confirmation Code for ${username}: ${randToken}`); // TODO -> send confirmation sms
+      await Confirmation.insert({type: 'mobile', username: usernamePrefix, code: randToken, notes: 'register'}, client);
+      console.log(`Mobile Confirmation Code for ${usernamePrefix}: ${randToken}`); // TODO -> send confirmation sms
     }
 
     // Sign activities
-    await UserActivity.insert({ username, type: 'login' }, client);
-    await UserActivity.insert({ username, type: 'register' }, client);
+    await UserActivity.insert({ username: usernamePrefix, type: 'login' }, client);
+    await UserActivity.insert({ username: usernamePrefix, type: 'register' }, client);
     
     // Send token and commit database changes
     const token = signToken(user);
@@ -63,7 +66,7 @@ const register = async (req, res) => {
     console.log("New User Created:\n", user);
   } catch (err) {
     // TODO -> create logging system
-    console.error(`Error Creating ${username}:\n`, err);
+    console.error(`Error Creating ${usernamePrefix}:\n`, err);
     await transaction.rollback(client);
     response.serverError.serverError(res);
   } 
@@ -72,6 +75,7 @@ const register = async (req, res) => {
 const login = async (req, res) => {
   console.log("Loging in User ...");
   const { username, password } = req.body;
+  const usernamePrefix = `${process.env.USERNAME_PREFIX}${username}`;
   
   const client = await transaction.start();
   
@@ -80,7 +84,7 @@ const login = async (req, res) => {
     validator.loginValidator(username, password);
 
     // Check if the user exists
-    let user = await User.findByUsername(username, client); // by username
+    let user = await User.findByUsername(usernamePrefix, client); // by username
     if(!user) user = await User.findByEmail(username, client); // by email
     if(!user) {
       await transaction.end(client);
@@ -95,7 +99,7 @@ const login = async (req, res) => {
     }
     
     // Sign activity
-    await UserActivity.update({username, type: 'login'}, client);
+    await UserActivity.update({ username: user.username, type: 'login' }, client);
 
     // Check if user has pending confirmations
     const email = await Confirmation.findUserWithType({ username: user.username, type: 'email' }, client);
@@ -105,10 +109,10 @@ const login = async (req, res) => {
     const token = signToken(user);
     await transaction.commit(client);
     response.success.sendToken(res, token, { body: { user, confirmed: { email: !email, mobile: !mobile }}, status: 200 });
-    console.log("User logged in -> ", user.username);
+    console.log("User logged in -> ", usernamePrefix);
   } catch (err) {
      // TODO -> create logging system
-     console.error(`Error Logging ${username}:\n`, err);
+     console.error(`Error Logging ${usernamePrefix}:\n`, err);
      await transaction.rollback(client);
      response.serverError.serverError(res);
   }
@@ -120,7 +124,9 @@ const login = async (req, res) => {
 const confirmAccount = async (req, res) => {
   const { type } = req.body;
   const { username } = req.decodedToken;
-  console.log(`Confirming ${type} for ${username} ...`);
+  const usernamePrefix = `${process.env.USERNAME_PREFIX}${username}`;
+
+  console.log(`Confirming ${type} for ${usernamePrefix} ...`);
 
   const client = await transaction.start();
   
@@ -129,13 +135,13 @@ const confirmAccount = async (req, res) => {
     validator.confirmAccountValidator(username, type);
 
     // Get User's confirmation info
-    const user = await Confirmation.findUserWithType({ username, type}, client);
+    const user = await Confirmation.findUserWithType({ username: usernamePrefix, type}, client);
     if(!user) throw new Error(`User tries to confirm ${type} without confirmation code`);
 
     // Check if code provided is valid
     if(user.code == req.body.code) {
-      await Confirmation.delete({ username, type }, client);
-      await UserActivity.upsert({ username, type: `${type}_confirmation` }, client);
+      await Confirmation.delete({ username: user.username, type }, client);
+      await UserActivity.upsert({ username: user.username, type: `${type}_confirmation` }, client);
     } else {
       transaction.end(client);
       return response.clientError.userNotAuthenticated(res);
@@ -144,7 +150,7 @@ const confirmAccount = async (req, res) => {
     await transaction.commit(client);
     response.success.success(res, { body: { confirm: type }});
   } catch (err) {
-    console.error(`Error Confirming ${type} for ${username}:\n`, err);
+    console.error(`Error Confirming ${type} for ${usernamePrefix}:\n`, err);
     await transaction.rollback(client);
     response.serverError.serverError(res);
   }
