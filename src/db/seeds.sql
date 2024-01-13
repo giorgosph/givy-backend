@@ -1,12 +1,12 @@
 INSERT INTO "users" ("username", "first_name", "last_name", "email", "password", "paid_plan", "mobile", "mobile_ext", "is_confirmed", "gender", "country", "city", "address_line_1", "address_line_2", "postal_code", "role")
 VALUES
-  ('0000$john', 'John', 'Doe', 'john@example.com', '$2b$10$99Y4iROjhjrWOIE1XdUhDuJ6y232wQjxxDmvjk03egan5vryXfjyK', 'basic', '1234567890', 357, TRUE, 'male', 'USA', 'New York', '123 Main St', NULL, '10001', 'admin'),
-  ('0000$jane', 'Jane', 'Smith', 'jane@example.com', '$2b$10$99Y4iROjhjrWOIE1XdUhDuJ6y232wQjxxDmvjk03egan5vryXfjyK', 'basic', '9876543210', 357, TRUE, 'female', 'Canada', 'Toronto', '456 Elm St', 'Apt 102', 'M1M1M1', 'client'),
-  ('0000$sam', 'Sam', 'Jackson', 'sam@example.com', '$2b$10$99Y4iROjhjrWOIE1XdUhDuJ6y232wQjxxDmvjk03egan5vryXfjyK', 'basic', '5556667777', 357, FALSE, 'other', 'UK', 'London', '789 Oak St', NULL, 'SW1A 1AA', 'client'),
-  ('0000$gph', 'Sam', 'Jackson', 'gph@example.com', '$2b$10$99Y4iROjhjrWOIE1XdUhDuJ6y232wQjxxDmvjk03egan5vryXfjyK', 'basic', '5556667776', 357, FALSE, 'other', 'UK', 'London', '789 Oak St', NULL, 'SW1A 1AA', 'client'),
-  ('0000$gg', 'Sam', 'Jackson', 'gg@example.com', '$2b$10$99Y4iROjhjrWOIE1XdUhDuJ6y232wQjxxDmvjk03egan5vryXfjyK', 'basic', '5556667775', 357, FALSE, 'other', 'UK', 'London', '789 Oak St', NULL, 'SW1A 1AA', 'client'),
-  ('0000$mamas', 'Sam', 'Jackson', 'mamas@example.com', '$2b$10$99Y4iROjhjrWOIE1XdUhDuJ6y232wQjxxDmvjk03egan5vryXfjyK', 'basic', '5556667774', 357, FALSE, 'other', 'UK', 'London', '789 Oak St', NULL, 'SW1A 1AA', 'client'),
-  ('0000$mamas11', 'Sam', 'Jackson', 'mamas11@example.com', '$2b$10$99Y4iROjhjrWOIE1XdUhDuJ6y232wQjxxDmvjk03egan5vryXfjyK', 'basic', '5556667773', 357, FALSE, 'other', 'UK', 'London', '789 Oak St', NULL, 'SW1A 1AA', 'client');
+  ('0000$john', 'John', 'Doe', 'john@example.com', '$2b$10$5kr5xCoRg8pRbGgI2EnFNucmc22FqaGOjucpgJL3CU249sYM/QGAC', 'basic', '1234567890', 357, TRUE, 'male', 'USA', 'New York', '123 Main St', NULL, '10001', 'admin'),
+  ('0000$jane', 'Jane', 'Smith', 'jane@example.com', '$2b$10$5kr5xCoRg8pRbGgI2EnFNucmc22FqaGOjucpgJL3CU249sYM/QGAC', 'basic', '9876543210', 357, TRUE, 'female', 'Canada', 'Toronto', '456 Elm St', 'Apt 102', 'M1M1M1', 'client'),
+  ('0000$sam', 'Sam', 'Jackson', 'sam@example.com', '$2b$10$5kr5xCoRg8pRbGgI2EnFNucmc22FqaGOjucpgJL3CU249sYM/QGAC', 'basic', '5556667777', 357, FALSE, 'other', 'UK', 'London', '789 Oak St', NULL, 'SW1A 1AA', 'client'),
+  ('0000$gph', 'Sam', 'Jackson', 'gph@example.com', '$2b$10$5kr5xCoRg8pRbGgI2EnFNucmc22FqaGOjucpgJL3CU249sYM/QGAC', 'basic', '5556667776', 357, FALSE, 'other', 'UK', 'London', '789 Oak St', NULL, 'SW1A 1AA', 'client'),
+  ('0000$gg', 'Sam', 'Jackson', 'gg@example.com', '$2b$10$5kr5xCoRg8pRbGgI2EnFNucmc22FqaGOjucpgJL3CU249sYM/QGAC', 'basic', '5556667775', 357, FALSE, 'other', 'UK', 'London', '789 Oak St', NULL, 'SW1A 1AA', 'client'),
+  ('0000$mamas', 'Sam', 'Jackson', 'mamas@example.com', '$2b$10$5kr5xCoRg8pRbGgI2EnFNucmc22FqaGOjucpgJL3CU249sYM/QGAC', 'basic', '5556667774', 357, FALSE, 'other', 'UK', 'London', '789 Oak St', NULL, 'SW1A 1AA', 'client'),
+  ('0000$mamas11', 'Sam', 'Jackson', 'mamas11@example.com', '$2b$10$5kr5xCoRg8pRbGgI2EnFNucmc22FqaGOjucpgJL3CU249sYM/QGAC', 'basic', '5556667773', 357, FALSE, 'other', 'UK', 'London', '789 Oak St', NULL, 'SW1A 1AA', 'client');
 
 INSERT INTO "draw" ("title", "image_path", "opening_date", "closing_date", "country", "location", "category")
 VALUES

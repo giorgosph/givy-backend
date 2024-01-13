@@ -41,7 +41,7 @@ const register = async (req, res) => {
     const hashed = await hash(password);
 
     // Register user 
-    const user = await User.register({ ...req.body, password: hashed }, client);
+    const user = await User.register({ ...req.body, username: usernamePrefix, password: hashed }, client);
     
     // Send confirmation email
     const randToken = genToken.random();
