@@ -95,7 +95,45 @@ const emailForgotPassword = async (req, res) => {
   }
 };
 
+/* --------------- Receiving Notification from User --------------- */
+/* ---------------------------------------------------------------- */
+
+const contactUs = async (req, res) => {
+  const { username } = req.decodedToken;
+  console.log(`Sending Email from User: ${username} ...`);
+
+  const client = await transaction.start();
+
+  try {
+    const { title, body } = req.body;
+
+    validator.generalValidator(body);
+    validator.generalValidator(title);
+    validator.usernameValidator(username);
+
+    const user = await User.findByUsername(username, client);
+    if(!user) {
+      await transaction.end(client);
+      return response.clientError.userNotAuthenticated(res, { body: { type: 'Email' }});
+    }
+
+    // TODO -> Remove after testing
+    // await emailer.sendFromUser({ title, body, username }, false);
+
+    await emailer.sendFromUser({ title, body, username }, user.email);
+
+    // In future change to commit if there are changes in database
+    transaction.end(client);
+    response.success.success(res, { body: { type: 'Email' }});
+  } catch (err) {
+    console.error(`Error Sending Email from User: ${username}:\n`, err);
+    await transaction.rollback(client);
+    response.serverError.serverError(res, { message: "Error sending email!\n Please contact support team." });
+  }
+};
+
 module.exports = {
+  contactUs,
   smsWithCode,
   emailWithCode,
   emailForgotPassword,

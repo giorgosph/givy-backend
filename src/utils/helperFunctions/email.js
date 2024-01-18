@@ -29,6 +29,26 @@ async function send(code) {
   }
 }
 
+async function sendFromUser(data, email) {
+  // Create a transporter using SMTP
+
+  // || process.env.EMAIL_RECIPIENT is used for testing purposes
+  const mailOptions = {
+    from: email || process.env.EMAIL_RECIPIENT,
+    to: process.env.EMAIL,
+    subject: `${data.title}`,
+    text: `Email from: ${data.usename}\n${data.body}`,
+  };
+
+  // Send the email
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    console.log("Email sent:", info.response);
+  } catch (e) {
+    throw new Error("Error sending email:\n", e);
+  }
+}
+
 /* --------------------------------------------------------- */
 
 /*
@@ -87,5 +107,6 @@ async function sendEmailWithQRCode(dataArr) {
 
 module.exports = { 
   send, 
+  sendFromUser,
   // sendEmailWithQRCode 
 };

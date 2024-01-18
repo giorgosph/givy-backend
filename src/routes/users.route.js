@@ -25,5 +25,6 @@ router.put("/details/shipping", verifyToken, users.editShippingDetails);
 router.put("/email/pass", notify.emailForgotPassword);
 router.put("/phone/code", verifyToken, notify.smsWithCode);
 router.put("/email/code", verifyToken, notify.emailWithCode);
+router.post("/email/contact", verifyToken, notify.contactUs);
 
 module.exports = router;
