@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS "users" (
   "address_line_2" TEXT,
   "postal_code" TEXT,
   "role" roles DEFAULT 'client',
+  "last_feedback_date" TIMESTAMP,
   PRIMARY KEY ("username")
 );
 
@@ -86,4 +87,12 @@ CREATE TABLE IF NOT EXISTS "draw_item_image" (
   "image_path" TEXT,
   PRIMARY KEY ("item_id", "image_path"),
   FOREIGN KEY ("item_id") REFERENCES "draw_item"("id")
+);
+
+CREATE TABLE IF NOT EXISTS "user_feedback" (
+  "username" TEXT,
+  "rating" TEXT NOT NULL,
+  "comments" TEXT,
+  PRIMARY KEY ("username"),
+  FOREIGN KEY ("username") REFERENCES "users"("username")
 );

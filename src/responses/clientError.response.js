@@ -26,9 +26,16 @@ const invalidData = (res) => {
  res.status(422).send({ success: false, message });
 }
 
+const conflictedData = (res) => {
+  const message = 'Data conflict';
+ 
+  res.status(409).send({ success: false, message });
+ }
+
 module.exports = {
   userExists,
   invalidData,
   noPrivilages,
+  conflictedData,
   userNotAuthenticated,
 };

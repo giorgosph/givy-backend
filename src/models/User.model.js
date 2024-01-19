@@ -20,6 +20,7 @@ module.exports = class User {
     this.address2 = data.address_line_2;
     this.postalCode = data.postal_code;
     this.role = data.role;
+    this.lastFeedbackDate = data.last_feedback_date;
   };
 
   static async getAll(client) {
@@ -128,4 +129,10 @@ module.exports = class User {
     await client.query(`UPDATE ${USERS} SET password=$1 WHERE username=$2`, [data.password, data.username]);
   };
   
+  /* ------------------- Others ------------------- */
+  /* ---------------------------------------------- */
+
+  static async updateFeedbackDate(username, client) {
+    await client.query(`UPDATE ${USERS} SET last_feedback_date=CURRENT_TIMESTAMP WHERE username=$1`,[username]);
+  };
 };

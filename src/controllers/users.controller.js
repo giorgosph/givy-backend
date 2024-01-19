@@ -1,6 +1,7 @@
-const User = require("../models/index").User;
-const UserActivity = require("../models/index").UserActivity;
-const Confirmation = require("../models/index").Confirmation;
+const User = require("../models").User;
+const UserFeedback = require("../models").UserFeedback;
+const UserActivity = require("../models").UserActivity;
+const Confirmation = require("../models").Confirmation;
 
 const response = require("../responses");
 const transaction = require("../db/db").transaction;
@@ -133,7 +134,56 @@ const editShippingDetails = async (req, res) => {
   }
 };
 
+/* ------------------ Other Activities ----------------------- */
+/* ----------------------------------------------------------- */
+
+const feedback = async (req, res) => {
+  const { username } = req.decodedToken;
+  console.log(`Receiving feedback from User: ${username} ...`);
+
+  const client = await transaction.start();
+
+  try {
+    const { comments, rating } = req.body;
+
+    validator.generalValidator(rating);
+    validator.generalValidator(comments);
+    validator.usernameValidator(username);
+
+    const user = await User.findByUsername(username, client);
+    if(!user) {
+      await transaction.end(client);
+      return response.clientError.userNotAuthenticated(res, { body: { type: 'Feedback' }});
+    }
+
+    // Chack lastest submited feedback
+    const currentDate = new Date();
+    const savedDate = new Date(user.lastFeedbackDate);
+    savedDate.setDate(savedDate.getDate() + 1);
+
+    if(currentDate < savedDate) {
+      await transaction.end(client);
+      return response.clientError.conflictedData(res);
+    }
+
+    // Update database
+    await User.updateFeedbackDate(username, client);
+    await UserFeedback.upsert({ username, rating, comments }, client);
+    
+    // TODO -> Send "Thank you for your feedback" email to user.email
+
+    // Commit
+    transaction.commit(client);
+    response.success.success(res, { body: { type: 'Feedback' }});
+  } catch (err) {
+    console.error(`Error Receiving Feedback from User: ${username}:\n`, err);
+    await transaction.rollback(client);
+    response.serverError.serverError(res, { message: "Error sending feedback!\n Please contact support team." });
+  }
+};
+
 module.exports = {
+  feedback,
   getUserDetails,
   editContactDetails,
   editShippingDetails,
