@@ -1,6 +1,7 @@
 const DrawAttenant = require("../models").DrawAttenant;
 
 const response = require("../responses");
+const log = require("../utils/logger/logger");
 const transaction = require("../db/db").transaction;
 const validator = require("../utils/helperFunctions/dataValidation");
 
@@ -9,7 +10,7 @@ const validator = require("../utils/helperFunctions/dataValidation");
 
 const register = async (req, res) => {
   const { username } = req.decodedToken
-  console.log(`Adding draw attenant for ${username} ...`);
+  log.info(`Adding draw attenant for ${username} ...`);
 
   const client = await transaction.start();
   
@@ -20,9 +21,10 @@ const register = async (req, res) => {
 
     await transaction.commit(client);
     response.success.success(res, { body: { drawId: draw.drawId } });
+    log.info(`Attenant added`);
   } catch (err) {
     await transaction.rollback(client);
-    console.error(`Error Adding Draw Attenant for ${username}:\n`, err);
+    log.error(`Error Adding Draw Attenant for ${username}:\n ${err}`);
     response.serverError.serverError(res);
   }
 };

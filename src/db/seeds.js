@@ -1,4 +1,5 @@
 const transaction = require("./db.js").transaction;
+const log = require("../utils/logger/logger");
 const fs = require("fs");
 
 const seedTables = fs.readFileSync(__dirname + "/seeds.sql").toString();
@@ -8,11 +9,11 @@ const seed = async () => {
 
   try {
     const result = await client.query(seedTables);
-    console.log(result);
+    log.debug(result);
 
     await transaction.commit(client);
   } catch (err) {
-    console.error(err);
+    log.error(`Adding seeds to database:\n ${err}`);
     await transaction.rollback(client);
   }
 };

@@ -1,4 +1,5 @@
 const nodemailer = require("nodemailer");
+const log = require("../logger/logger");
 // const qr = require("qrcode");
 
 const transporter = nodemailer.createTransport({
@@ -23,14 +24,14 @@ async function send(code) {
   // Send the email
   try {
     const info = await transporter.sendMail(mailOptions);
-    console.log("Email sent:", info.response);
+    log.debug(`Email sent: ${info.response}`);
   } catch (e) {
     throw new Error("Error sending email:\n", e);
   }
 }
 
 async function sendFromUser(data, email) {
-  // Create a transporter using SMTP
+  // TODO -> Create a transporter using SMTP
 
   // || process.env.EMAIL_RECIPIENT is used for testing purposes
   const mailOptions = {
@@ -43,7 +44,7 @@ async function sendFromUser(data, email) {
   // Send the email
   try {
     const info = await transporter.sendMail(mailOptions);
-    console.log("Email sent:", info.response);
+    log.debug(`Email sent: ${info.response}`);
   } catch (e) {
     throw new Error("Error sending email:\n", e);
   }

@@ -5,6 +5,7 @@ const Confirmation = require("../models").Confirmation;
 const response = require("../responses");
 const transaction = require("../db/db").transaction;
 
+const log = require("../utils/logger/logger");
 const emailer = require("../utils/helperFunctions/email");
 const genToken = require("../utils/helperFunctions/token");
 const validator = require("../utils/helperFunctions/dataValidation");
@@ -19,7 +20,7 @@ require("dotenv").config();
 /* ---------------------------------------------------------------- */
 
 const register = async (req, res) => {
-  console.log("Creating new User ...");
+  log.info("Creating new User ...");
   const { username, email, password } = req.body;
   const usernamePrefix = `${process.env.USERNAME_PREFIX}${username}`;
   
@@ -27,13 +28,13 @@ const register = async (req, res) => {
   
   try {
     // Validate data
-    console.log("Req Body: " + JSON.stringify(req.body));
     validator.registerValidator(req.body);
 
     // Check if the user's details are already registered
     const userExists = await User.findUser({ username: usernamePrefix, email }, client);
     if (userExists?.exist) {
       await transaction.end(client);
+      log.info(`${userExists.type} already exist`);
       return response.clientError.userExists(res, userExists.type);
     }
 
@@ -52,7 +53,7 @@ const register = async (req, res) => {
     if(user.mobile) {
       const randToken = genToken.random();
       await Confirmation.insert({type: 'mobile', username: usernamePrefix, code: randToken, notes: 'register'}, client);
-      console.log(`Mobile Confirmation Code for ${usernamePrefix}: ${randToken}`); // TODO -> send confirmation sms
+      log.debug(`Mobile Confirmation Code for ${usernamePrefix}: ${randToken}`); // TODO -> send confirmation sms
     }
 
     // Sign activities
@@ -63,19 +64,18 @@ const register = async (req, res) => {
     const token = signToken(user);
     await transaction.commit(client);
     response.success.sendToken(res, token, { body: { user, confirmed: { email: false, mobile: false }}});
-    console.log("New User Created:\n", user);
+    log.debug(`New User Created:\n ${user}`);
   } catch (err) {
-    // TODO -> create logging system
-    console.error(`Error Creating ${usernamePrefix}:\n`, err);
+    log.error(`Error Creating ${usernamePrefix}:\n${err}`);
     await transaction.rollback(client);
     response.serverError.serverError(res);
   } 
 };
 
 const login = async (req, res) => {
-  console.log("Loging in User ...");
   const { username, password } = req.body;
   const usernamePrefix = `${process.env.USERNAME_PREFIX}${username}`;
+  log.info(`Loging in User ${usernamePrefix} ...`);
   
   const client = await transaction.start();
   
@@ -88,6 +88,7 @@ const login = async (req, res) => {
     if(!user) user = await User.findByEmail(username, client); // by email
     if(!user) {
       await transaction.end(client);
+      log.info(`${username} not found`);
       return response.clientError.userNotAuthenticated(res);
     }
 
@@ -95,6 +96,7 @@ const login = async (req, res) => {
     const authed = await compareKeys(password, user.password);
     if(!authed) {
       await transaction.end(client);
+      log.info(`password mismatch`);
       return response.clientError.userNotAuthenticated(res);
     }
     
@@ -109,10 +111,9 @@ const login = async (req, res) => {
     const token = signToken(user);
     await transaction.commit(client);
     response.success.sendToken(res, token, { body: { user, confirmed: { email: !email, mobile: !mobile }}, status: 200 });
-    console.log("User logged in -> ", usernamePrefix);
+    log.info("User logged in -> ", usernamePrefix);
   } catch (err) {
-     // TODO -> create logging system
-     console.error(`Error Logging ${usernamePrefix}:\n`, err);
+     log.error(`Error Logging ${usernamePrefix}:\n ${err}`);
      await transaction.rollback(client);
      response.serverError.serverError(res);
   }
@@ -126,7 +127,7 @@ const confirmAccount = async (req, res) => {
   const { username } = req.decodedToken;
   const usernamePrefix = `${process.env.USERNAME_PREFIX}${username}`;
 
-  console.log(`Confirming ${type} for ${usernamePrefix} ...`);
+  log.info(`Confirming ${type} for ${usernamePrefix} ...`);
 
   const client = await transaction.start();
   
@@ -144,13 +145,16 @@ const confirmAccount = async (req, res) => {
       await UserActivity.upsert({ username: user.username, type: `${type}_confirmation` }, client);
     } else {
       transaction.end(client);
+      log.info(`| AC | Invalid code: ${req.body.code}`);
       return response.clientError.userNotAuthenticated(res);
     }
 
     await transaction.commit(client);
     response.success.success(res, { body: { confirm: type }});
+
+    log.info(`Account confirmed (${type})`);
   } catch (err) {
-    console.error(`Error Confirming ${type} for ${usernamePrefix}:\n`, err);
+    log.error(`Error Confirming ${type} for ${usernamePrefix}:\n ${err}`);
     await transaction.rollback(client);
     response.serverError.serverError(res);
   }
@@ -161,7 +165,7 @@ const confirmAccount = async (req, res) => {
 
 const forgotPassword = async (req, res) => {
   const { email, code, password } = req.body;
-  console.log(`Setting new password for ${email} ...`);
+  log.info(`Setting new password for ${email} ...`);
   
   const client = await transaction.start();
   
@@ -175,13 +179,14 @@ const forgotPassword = async (req, res) => {
     const user = await User.findByEmail(email, client);
     if(!user) {
       await transaction.end(client);
+      log.info(`User not found ${email}`);
       return response.clientError.userNotAuthenticated(res);
     }
 
     const username = user.username;
 
     // Get User's confirmation info
-    const userCode = await Confirmation.findUserWithType({ username, type}, client);
+    const userCode = await Confirmation.findUserWithType({ username, type }, client);
     if(!userCode) throw new Error(`User tries to set new password without confirmation code`);
 
     // Check if code provided is valid
@@ -193,6 +198,7 @@ const forgotPassword = async (req, res) => {
       await UserActivity.upsert({ username, type: 'reset_password' }, client); // Sign the activity
     } else {
       transaction.end(client);
+      log.warn(`| FP | Invalid code: ${code}`);
       return response.clientError.userNotAuthenticated(res);
     }
 
@@ -204,8 +210,9 @@ const forgotPassword = async (req, res) => {
     const token = signToken(user);
     await transaction.commit(client);
     response.success.sendToken(res, token, { body: { user, pass: true, confirmed: { email: !emailExist, mobile: !mobile }}});
+    log.info(`| FP | Password changed`);
   } catch (err) {
-    console.error(`Error Setting new password for ${email}:\n`, err);
+    log.error(`Error Setting new password for ${email}:\n ${err}`);
     await transaction.rollback(client);
     response.serverError.serverError(res);
   }
@@ -213,7 +220,7 @@ const forgotPassword = async (req, res) => {
 
 const resetPassword = async (req, res) => {
   const { username } = req.decodedToken;
-  console.log(`Resetting password for ${username} ...`);
+  log.info(`Resetting password for ${username} ...`);
   
   const client = await transaction.start();
   
@@ -228,6 +235,7 @@ const resetPassword = async (req, res) => {
     const user = await User.findByUsername(username, client);
     if(!user) {
       await transaction.end(client);
+      log.warn(`| RP | User not found`)
       return response.clientError.userNotAuthenticated(res);
     }
 
@@ -237,8 +245,9 @@ const resetPassword = async (req, res) => {
 
     await transaction.commit(client);
     response.success.success(res, { body: { pass: true }});
+    log.info(`| RP | Password changed`);
   } catch (err) {
-    console.error(`Error Resetting password for ${username}:\n`, err);
+    log.error(`Error Resetting password for ${username}:\n ${err}`);
     await transaction.rollback(client);
     response.serverError.serverError(res);
   }

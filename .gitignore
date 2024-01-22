@@ -8,3 +8,7 @@ node_modules
 data
 migrations
 .eslintrc.json
+
+#Logs
+logs
+*.log

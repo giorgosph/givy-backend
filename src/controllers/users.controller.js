@@ -6,6 +6,7 @@ const Confirmation = require("../models").Confirmation;
 const response = require("../responses");
 const transaction = require("../db/db").transaction;
 
+const log = require("../utils/logger/logger");
 const emailer = require("../utils/helperFunctions/email");
 const genToken = require("../utils/helperFunctions/token");
 const validator = require("../utils/helperFunctions/dataValidation");
@@ -15,7 +16,7 @@ const validator = require("../utils/helperFunctions/dataValidation");
 
 const getUserDetails = async (req, res) => {
   const { username } = req.decodedToken;
-  console.log(`Getting User Details for ${username}`);
+  log.info(`Getting User Details for ${username} ...`);
 
   const client = await transaction.start();
 
@@ -25,14 +26,15 @@ const getUserDetails = async (req, res) => {
     const user = await User.findByUsername(username, client);
     if(!user) {
       await transaction.end(client);
+      log.warn(`| UD | User not found`);
       return response.clientError.userNotAuthenticated(res);
     }
 
-    console.log("Sending User Details:\n", user);
     response.success.success(res, { body: user });
+    log.info("User Details fetched");
   } catch (err) {
     await transaction.end(client);
-    console.error(`Error Getting User's Details for ${username}:\n`, err);
+    log.error(`Error Getting User's Details for ${username}:\n ${err}`);
     response.serverError.serverError(res);
   }
 };
@@ -42,7 +44,7 @@ const getUserDetails = async (req, res) => {
 
 const editContactDetails = async (req, res) => {
   const { username } = req.decodedToken;
-  console.log(`Editing Contact Details for ${username}...`);
+  log.info(`Editing Contact Details for ${username} ...`);
 
   const client = await transaction.start();    
   
@@ -54,12 +56,16 @@ const editContactDetails = async (req, res) => {
     validator.confirmAccountValidator(username, mobile);
 
     // Filter Data: Email cannot be null
-    if(!email) return response.clientError.invalidData(res);
+    if(!email) {
+      log.warn(`| ECD | Invalid email provided: ${email}`);
+      return response.clientError.invalidData(res);
+    }
 
     // Get user's data
     const user = await User.findByUsername(username, client);
     if(!user) {
       await transaction.end(client);
+      log.warn(`| ECD | User not found`);
       return response.clientError.userNotAuthenticated(res);
     }
 
@@ -70,7 +76,7 @@ const editContactDetails = async (req, res) => {
     let newMobile = false;
 
     if(hasNewEmail) {
-      console.log("Updating email...");
+      log.debug("Updating email...");
       newEmail = await User.updateEmail({email, username}, client);
 
       // Create random token and send confirmation email
@@ -80,13 +86,13 @@ const editContactDetails = async (req, res) => {
     }
 
     if(hasNewMobile) {
-      console.log("Updating mobile...");
+      log.debug("Updating mobile...");
       newMobile = await User.updateMobile({mobile, username}, client);
 
       // Create random token and send confirmation sms
       const randToken = genToken.random();
       await Confirmation.upsert({type: 'mobile', username, code: randToken, notes: 'update mobile'}, client);
-      console.log(`Mobile Confirmation Code for ${username}: ${randToken}`); // TODO -> send confirmation sms
+      log.debug(`Mobile Confirmation Code for ${username}: ${randToken}`); // TODO -> send confirmation sms
     }
 
     if(hasNewEmail || hasNewMobile) {
@@ -96,18 +102,18 @@ const editContactDetails = async (req, res) => {
       
     } else await transaction.end(client);
 
-    console.log(`Sending response with email: ${newEmail} and mobile: ${newMobile}`);
     response.success.success(res, { body: { contactDetails: { email: newEmail, mobile: newMobile }}});
+    log.info(`Contact Details updated`);
   } catch (err) {
     await transaction.rollback(client);
-    console.error(`Error Updating ${username}'s Contact Details:\n`, err);
+    log.error(`Error Updating ${username}'s Contact Details:\n ${err}`);
     response.serverError.serverError(res);
   }
 };
 
 const editShippingDetails = async (req, res) => {
   const { username } = req.decodedToken
-  console.log(`Editing Shipping Details for ${username}...`);
+  log.info(`Editing Shipping Details for ${username} ...`);
   const client = await transaction.start();
   
   try {
@@ -119,6 +125,7 @@ const editShippingDetails = async (req, res) => {
     const userExists = await User.findByUsername(username, client);
     if(!userExists) {
       await transaction.end(client);
+      log.warn(`| ESD | User not found`);
       return response.clientError.userNotAuthenticated(res);
     }
 
@@ -127,9 +134,10 @@ const editShippingDetails = async (req, res) => {
     
     await transaction.commit(client);
     response.success.success(res, { body: { shippingDetails: user }});
+    log.info('Shipping Details updated');
   } catch (err) {
     await transaction.rollback(client);
-    console.error(`Error Updating ${username}'s Shipping Details:\n`, err);
+    log.error(`Error Updating ${username}'s Shipping Details:\n ${err}`);
     response.serverError.serverError(res);
   }
 };
@@ -139,7 +147,7 @@ const editShippingDetails = async (req, res) => {
 
 const feedback = async (req, res) => {
   const { username } = req.decodedToken;
-  console.log(`Receiving feedback from User: ${username} ...`);
+  log.info(`Receiving feedback from User: ${username} ...`);
 
   const client = await transaction.start();
 
@@ -153,6 +161,7 @@ const feedback = async (req, res) => {
     const user = await User.findByUsername(username, client);
     if(!user) {
       await transaction.end(client);
+      log.warn(`| FB | User not found`);
       return response.clientError.userNotAuthenticated(res, { body: { type: 'Feedback' }});
     }
 
@@ -163,6 +172,7 @@ const feedback = async (req, res) => {
 
     if(currentDate < savedDate) {
       await transaction.end(client);
+      log.info(`Feedback was updated earlier`);
       return response.clientError.conflictedData(res);
     }
 
@@ -175,8 +185,9 @@ const feedback = async (req, res) => {
     // Commit
     transaction.commit(client);
     response.success.success(res, { body: { type: 'Feedback' }});
+    log.info('Feedback updated');
   } catch (err) {
-    console.error(`Error Receiving Feedback from User: ${username}:\n`, err);
+    log.error(`Error Receiving Feedback from User: ${username}:\n ${err}`);
     await transaction.rollback(client);
     response.serverError.serverError(res, { message: "Error sending feedback!\n Please contact support team." });
   }

@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const log = require("../logger/logger");
 
 const signToken = (user) => {
   const payload = {
@@ -16,10 +17,10 @@ const extractToken = (req) => {
   if (header) {
     const token = header.split(" ")[1].trim();
     const decodedToken = jwt.verify(token, process.env.SECRET);
-    console.log("Decoded Token:\n", decodedToken);
+    log.debug(`Decoded Token:\n ${decodedToken}`);
     
     return decodedToken;
-  }else console.error("No Authorization Header");
+  }else log.warn("No Authorization Header");
 };
 
 module.exports = {

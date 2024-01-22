@@ -1,8 +1,9 @@
 const extractToken = require("../utils/helperFunctions/jwt").extractToken;
-const response = require("../responses/index")
+const response = require("../responses/index");
+const log = require("../utils/logger/logger");
 
 function verifyToken(req, res, next) {
-  console.log(`Verifying token...`);
+  log.debug(`Verifying token ...`);
 
   try {
     const token = extractToken(req);
@@ -12,7 +13,7 @@ function verifyToken(req, res, next) {
       next();
     } else response.clientError.noPrivilages(res);
   } catch (err) {
-    console.error("Error verifying token:\n", err.message);
+    log.error(`Error verifying token:\n ${err}`);
     response.serverError.serverError(res);
   }
 }
@@ -38,7 +39,7 @@ function verifyUserRole(requiredRole) {
 function verifyAll(requiredRoles) {
   return (req, res, next) => {
     const token = extractToken(req);
-    console.log("Token: ", token);
+    log.debug("Token: ", token);
     if (
       token &&
       requiredRoles.includes(token.role) &&

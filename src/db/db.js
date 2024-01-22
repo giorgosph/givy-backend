@@ -1,4 +1,6 @@
 const { Pool } = require("pg");
+const log = require("../utils/logger/logger");
+
 require("dotenv").config();
 
 const pool = new Pool({
@@ -14,7 +16,7 @@ const startTransaction = async () => {
   
   try {
     client = await pool.connect();
-    console.log("Connected to database");
+    log.debug("Connected to database");
 
     await client.query("BEGIN");
     return client;
@@ -26,28 +28,28 @@ const startTransaction = async () => {
 
 const commitTransaction = async client => {
   await client.query("COMMIT");
-  console.log("Transaction committed");
+  log.debug("Transaction committed");
   endTransaction(client);
 };
 
 const rollbackTransaction = async client => {
   await client.query("ROLLBACK");
-  console.log("Transaction rollbacked");
+  log.debug("Transaction rollbacked");
   endTransaction(client);
 };
 
 const endTransaction = async client => {  
   await client.release();
-  console.log("Disconnected from database");
+  log.debug("Disconnected from database");
 }
 /* --------------------- Check Connection --------------------- */
 
 (async() => {
   try {
     const res = await pool.query("SELECT NOW()");
-    console.log("DATABASE connected", res.rows[0].now);
+    log.debug(`DATABASE connected ${res.rows[0].now}`);
   } catch (e) {
-    console.log("DB connection error:\n" + e);
+    log.error(`DB connection error:\n ${e}`);
   }
 })();
 

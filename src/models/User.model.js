@@ -40,6 +40,7 @@ module.exports = class User {
     user = await this.findByEmail(data.email, client);
     if (user) return {exist: true, type: 'email'};
 
+    // TODO -> Mobile check
     // user = await this.findByMobile(data.mobile, client);
     // if (user) return {exist: true, type: 'mobile'};
 

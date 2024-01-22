@@ -5,13 +5,14 @@ const DrawAttenant = require("../models").DrawAttenant;
 const response = require("../responses");
 const transaction = require("../db/db").transaction;
 
+const log = require("../utils/logger/logger");
 const validator = require("../utils/helperFunctions/dataValidation");
 
 /* ---------------- Get Draws ---------------- */
 /* ------------------------------------------- */
 
 const getCurrentDraws = async (req, res) => {
-  console.log("Getting current draws...");
+  log.debug("Getting current draws ...");
   const client = await transaction.start();
   
   try {
@@ -21,7 +22,7 @@ const getCurrentDraws = async (req, res) => {
 
     response.success.success(res, { body: draws });
   } catch (err) {
-    console.error("Error Getting Current Draws:\n", err);
+    log.error(`Error Getting Current Draws:\n ${err}`);
     await transaction.end(client);
     response.serverError.serverError(res);
   }
@@ -30,7 +31,7 @@ const getCurrentDraws = async (req, res) => {
 const getUserDraws = async (req, res) => {
   const { username } = req.decodedToken;
   const client = await transaction.start();
-  console.log(`Getting user draws for ${username} ...`);
+  log.debug(`Getting user draws for ${username} ...`);
 
   try {
     validator.usernameValidator(username);
@@ -42,7 +43,7 @@ const getUserDraws = async (req, res) => {
 
     response.success.success(res, { body: { draws, wins} });
   } catch (err) {
-    console.error(`Error Getting User Draws for ${username}:\n`, err);
+    log.error(`Error Getting User Draws for ${username}:\n ${err}`);
     await transaction.end(client);
     response.serverError.serverError(res);
   }
@@ -53,7 +54,7 @@ const getUserDraws = async (req, res) => {
 
 const getDrawItems = async (req, res) => {
   const drawId = req.params.drawId;
-  console.log(`Getting items for draw ${drawId} ...`);
+  log.debug(`Getting items for draw ${drawId} ...`);
   const client = await transaction.start();
 
   try {
@@ -64,8 +65,8 @@ const getDrawItems = async (req, res) => {
     
     if(!items) return response.success.noData(res);
     response.success.success(res, { body: items });
-  } catch (error) {
-    console.error("Error Getting Current Draws:\n", error);
+  } catch (err) {
+    log.error(`Error Getting Current Draws:\n ${err}`);
     await transaction.end(client);
     response.serverError.serverError(res);
   }

@@ -4,21 +4,22 @@ const DrawItem = require("../models").DrawItem;
 const DrawAttenant = require("../models").DrawAttenant;
 const Confirmation = require("../models").Confirmation;
 
+const ws = require("../webSocket");
 const transaction = require("../db/db").transaction;
 
-const ws = require("../webSocket");
+const log = require("../utils/logger/logger");
 const emailer = require("../utils/helperFunctions/email");
 
 /* -------------------------------------------------------------------- */
 
 const checkUpcomingDraws = async () => {
-  console.log("Checking for Upcoming Draws (Scheduler) ...");
+  log.info("Checking for Upcoming Draws (Scheduler) ...");
   const client = await transaction.start();
 
   try {
     const draws = await Draw.getUpcomingDrawsUnder4Hours(client)
     await transaction.end(client);
-    if(!draws) return;
+    if(!draws) return log.debug("No Upcoming Draws");
 
     draws.forEach((draw) => {
       const currentTime = new Date().getTime();
@@ -29,7 +30,7 @@ const checkUpcomingDraws = async () => {
       if(timeDifference <= 4 * 60 * 60 * 1000 && timeDifference > 0) {
         setTimeout(async () => {
           const client2 = await transaction.start();
-          console.log(`Calculating winners for draw with id: ${draw.id}`);
+          log.info(`Calculating winners for draw: ${draw.id}`);
 
           try {
             // Get all Items for the draw
@@ -49,7 +50,7 @@ const checkUpcomingDraws = async () => {
 
               // Set winner to drawItem table
               await DrawItem.setWinner({username: winner, drawId: draw.id, id: item.id}, client2);
-              console.log(`Winner for ${item.id}: ${winner}`);
+              log.info(`Winner for item: ${item.id} -> ${winner}`);
               winners[item.id] = winner;
 
               // Send email and sms to the user
@@ -71,16 +72,17 @@ const checkUpcomingDraws = async () => {
             ws.send({ body, message, type: 'runningDraws'});
 
             await transaction.commit(client2);
+            log.info('Winners calculated successfully');
           } catch (err) {
             await transaction.rollback(client2);
-            console.error(`Error calculating winners for draw with id: ${draw.id}:\n`, err);
+            log.error(`Error calculating winners for draw with id: ${draw.id}:\n ${err}`);
           }
         }, timeDifference);
       }
     });
   } catch (err) {
     await transaction.rollback(client);
-    console.error('Error while checking upcoming draws:\n', err);
+    log.error(`Error while checking upcoming draws:\n ${err}`);
   }
 };
 

@@ -2,9 +2,9 @@ const express = require("express");
 const router = express.Router();
 const { verifyToken } = require("../middleware/auth");
 
-const auth = require("../controllers/index").auth;
-const users = require("../controllers/index").users;
-const notify = require("../controllers/index").notification;
+const auth = require("../controllers").auth;
+const users = require("../controllers").users;
+const notify = require("../controllers").notification;
 
 /* ------------------------ Auth Routes ------------------------ */
 

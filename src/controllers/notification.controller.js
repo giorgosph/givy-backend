@@ -4,6 +4,7 @@ const Confirmation = require("../models").Confirmation;
 const response = require("../responses");
 const transaction = require("../db/db").transaction;
 
+const log = require("../utils/logger/logger");
 const emailer = require("../utils/helperFunctions/email");
 const genToken = require("../utils/helperFunctions/token");
 const validator = require("../utils/helperFunctions/dataValidation");
@@ -13,7 +14,7 @@ const validator = require("../utils/helperFunctions/dataValidation");
 
 const emailWithCode = async (req, res) => {
   const { username } = req.decodedToken;
-  console.log(`Sending email to ${username}...`);
+  log.info(`Sending email to ${username} ...`);
 
   const client = await transaction.start();
 
@@ -23,6 +24,7 @@ const emailWithCode = async (req, res) => {
     const user = await User.findByUsername(username, client);
     if(!user) {
       await transaction.end(client);
+      log.warn(`| EWC | User not found`);
       return response.clientError.userNotAuthenticated(res, { body: { type: 'Email' }});
     }
 
@@ -32,8 +34,9 @@ const emailWithCode = async (req, res) => {
 
     transaction.commit(client);
     response.success.success(res, { body: { type: 'Email' }});
+    log.info('Email sent successfully');
   } catch (err) {
-    console.error(`Error Sending Email with Code to ${username}:\n`, err);
+    log.error(`Error Sending Email with Code to ${username}:\n ${err}`);
     await transaction.rollback(client);
     response.serverError.serverError(res, { message: "Error sending email!\n Please contact support team." });
   }
@@ -41,7 +44,7 @@ const emailWithCode = async (req, res) => {
 
 const smsWithCode = async (req, res) => {
   const { username } = req.decodedToken;
-  console.log(`Sending SMS to ${username}...`);
+  log.info(`Sending SMS to ${username} ...`);
 
   const client = await transaction.start();
 
@@ -51,17 +54,19 @@ const smsWithCode = async (req, res) => {
     const user = await User.findByUsername(username, client);
     if(!user) {
       await transaction.end(client);
+      log.warn(`| SWC | User not found`);
       return response.clientError.userNotAuthenticated(res, { body: { type: 'SMS' }});
     }
 
     const randToken = genToken.random();
     await Confirmation.update({type: 'mobile', username, code: randToken, notes: 'resend'}, client);
-    console.log(`Mobile Confirmation Code for ${username}: ${randToken}`); // TODO -> send confirmation sms
+    log.debug(`Mobile Confirmation Code for ${username}: ${randToken}`); // TODO -> send confirmation sms
 
     transaction.commit(client);
     response.success.success(res, { body: { type: 'SMS' }});
+    log.info('SMS sent successfully');
   } catch (err) {
-    console.error(`Error Sending SMS with Code to ${username}:\n`, err);
+    log.error(`Error Sending SMS with Code to ${username}:\n ${err}`);
     await transaction.rollback(client);
     response.serverError.serverError(res, { message: "Error sending SMS!\n Please contact support team." });
   }
@@ -69,7 +74,7 @@ const smsWithCode = async (req, res) => {
 
 const emailForgotPassword = async (req, res) => {
   const { email } = req.body;
-  console.log(`Sending email to ${email}...`);
+  log(`Sending email to ${email} ...`);
 
   const client = await transaction.start();
 
@@ -79,6 +84,7 @@ const emailForgotPassword = async (req, res) => {
     const user = await User.findByEmail(email, client);
     if(!user) {
       await transaction.end(client);
+      log.warn(`| EFP | User not found`);
       return response.clientError.userNotAuthenticated(res, { body: { type: 'Email' }});
     }
 
@@ -88,8 +94,9 @@ const emailForgotPassword = async (req, res) => {
 
     transaction.commit(client);
     response.success.success(res, { body: { type: 'Email' }});
+    log.info('Email sent successfully');
   } catch (err) {
-    console.error(`Error Sending Email with Code to Reset Password for ${email}:\n`, err);
+    log.error(`Error Sending Email with Code to Reset Password for ${email}:\n ${err}`);
     await transaction.rollback(client);
     response.serverError.serverError(res, { message: "Error sending email!\n Please contact support team." });
   }
@@ -100,7 +107,7 @@ const emailForgotPassword = async (req, res) => {
 
 const contactUs = async (req, res) => {
   const { username } = req.decodedToken;
-  console.log(`Sending Email from User: ${username} ...`);
+  log.info(`Sending Email from User: ${username} ...`);
 
   const client = await transaction.start();
 
@@ -114,10 +121,12 @@ const contactUs = async (req, res) => {
     const user = await User.findByUsername(username, client);
     if(!user) {
       await transaction.end(client);
+      log.warn(`| EFU | User not found`);
       return response.clientError.userNotAuthenticated(res, { body: { type: 'Email' }});
     }
 
     // TODO -> Remove after testing
+    // TODO -> Email must be sent from admin account to admin account mentioning the user's actual email
     // await emailer.sendFromUser({ title, body, username }, false);
 
     await emailer.sendFromUser({ title, body, username }, user.email);
@@ -125,8 +134,9 @@ const contactUs = async (req, res) => {
     // In future change to commit if there are changes in database
     transaction.end(client);
     response.success.success(res, { body: { type: 'Email' }});
+    log.info('Email sent successfully');
   } catch (err) {
-    console.error(`Error Sending Email from User: ${username}:\n`, err);
+    log.error(`Error Sending Email from User: ${username}:\n ${err}`);
     await transaction.rollback(client);
     response.serverError.serverError(res, { message: "Error sending email!\n Please contact support team." });
   }
