@@ -17,7 +17,7 @@ const extractToken = (req) => {
   if (header) {
     const token = header.split(" ")[1].trim();
     const decodedToken = jwt.verify(token, process.env.SECRET);
-    log.debug(`Decoded Token:\n ${decodedToken}`);
+    log.debug(`Decoded Token:\n ${JSON.stringify(decodedToken)}`);
     
     return decodedToken;
   }else log.warn("No Authorization Header");

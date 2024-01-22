@@ -9,6 +9,7 @@ require("dotenv").config();
 
 const users = require("./routes/users.route");
 const draws = require("./routes/draws.route");
+const admin = require("./routes/admin.route");
 
 const ws = require("./webSocket");
 
@@ -28,6 +29,7 @@ app.use(express.json());
 // Set up routes
 app.use(`${apiRoute}/users`, users);
 app.use(`${apiRoute}/draws`, draws);
+app.use(`${apiRoute}/admin`, admin);
 
 // Set up scheduler to check for upcoming draws every 4 hours
 cron.schedule('0 */4 * * *', checkUpcomingDraws);
