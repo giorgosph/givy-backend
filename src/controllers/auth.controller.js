@@ -13,11 +13,12 @@ const validator = require("../utils/helperFunctions/dataValidation");
 const hash = require("../utils/helperFunctions/hash").encrypt;
 const signToken = require("../utils/helperFunctions/jwt").signToken;
 const compareKeys = require("../utils/helperFunctions/hash").compareKeys;
+const extractRefreshToken = require("../utils/helperFunctions/jwt").extractRefreshToken;
 
 require("dotenv").config();
 
-/* ------------------------ Log In/Sign Up ------------------------ */
-/* ---------------------------------------------------------------- */
+/* ------------------------ Log In/Sign Up/Log Out ------------------------ */
+/* ------------------------------------------------------------------------ */
 
 const register = async (req, res) => {
   log.info("Creating new User ...");
@@ -60,10 +61,24 @@ const register = async (req, res) => {
     await UserActivity.insert({ username: usernamePrefix, type: 'login' }, client);
     await UserActivity.insert({ username: usernamePrefix, type: 'register' }, client);
     
-    // Send token and commit database changes
-    const token = signToken(user);
+    const payload = {
+      username: user.username,
+      email: user.email,
+    };
+
+    // Sign tokens
+    const accessToken = signToken(payload, '30m');
+    const refreshToken = signToken(payload, '7d', true);
+
+    // Set HTTP-only cookie for refresh token
+    res.cookie('refreshToken', refreshToken, { 
+      httpOnly: true, 
+      // sameSite: 'Strict', // Uncoment for production
+      // secure: true // Uncoment for production
+    });
+
     await transaction.commit(client);
-    response.success.sendToken(res, token, { body: { user, confirmed: { email: false, mobile: false }}});
+    response.success.sendToken(res, accessToken, { body: { user, confirmed: { email: false, mobile: false }}});
     log.debug(`New User Created:\n ${user}`);
   } catch (err) {
     log.error(`Error Creating ${usernamePrefix}:\n${err}`);
@@ -75,7 +90,7 @@ const register = async (req, res) => {
 const login = async (req, res) => {
   const { username, password } = req.body;
   const usernamePrefix = `${process.env.USERNAME_PREFIX}${username}`;
-  log.info(`Loging in User ${usernamePrefix} ...`);
+  log.info(`Logging in User ${usernamePrefix} ...`);
   
   const client = await transaction.start();
   
@@ -107,16 +122,47 @@ const login = async (req, res) => {
     const email = await Confirmation.findUserWithType({ username: user.username, type: 'email' }, client);
     const mobile = await Confirmation.findUserWithType({ username: user.username, type: 'mobile' }, client);
 
+    const payload = {
+      username: user.username,
+      email: user.email,
+    };
+
     // Send token and commit database changes
-    const token = signToken(user);
+    const accessToken = signToken(payload, '30m');
+    const refreshToken = signToken(payload, '7d', true);
+
+    // Set HTTP-only cookie for refresh token
+    res.cookie('refreshToken', refreshToken, { 
+      httpOnly: true, 
+      // sameSite: 'Strict', // Uncoment for production
+      // secure: true // Uncoment for production
+    });
+
     await transaction.commit(client);
-    response.success.sendToken(res, token, { body: { user, confirmed: { email: !email, mobile: !mobile }}, status: 200 });
+    response.success.sendToken(res, accessToken, { body: { user, confirmed: { email: !email, mobile: !mobile }}, status: 200 });
     log.info("User logged in -> ", usernamePrefix);
   } catch (err) {
-     log.error(`Error Logging ${usernamePrefix}:\n ${err}`);
+     log.error(`Error Logging in ${usernamePrefix}:\n ${err}`);
      await transaction.rollback(client);
      response.serverError.serverError(res);
   }
+};
+
+const logout = async (req, res) => {
+  const { username } = req.decodedToken;
+  log.info(`Logging out: ${username}`);
+
+  try {
+    await req.session.destroy();
+    await res.clearCookie('refreshToken');
+    
+    response.success.success(res);
+    log.info(`Log out successfully`);
+  } catch (err) {
+    log.error(`Error Logging out ${username}:\n ${err}`);
+    response.serverError.serverError(res);
+  }
+
 };
 
 /* --------------------- Confirm email/mobile --------------------- */
@@ -206,10 +252,24 @@ const forgotPassword = async (req, res) => {
     const mobile = await Confirmation.findUserWithType({ username: user.username, type: 'mobile' }, client);
     const emailExist = await Confirmation.findUserWithType({ username: user.username, type: 'email' }, client);
   
+    const payload = {
+      username: user.username,
+      email: user.email,
+    };
+
     // Send token and commit database changes
-    const token = signToken(user);
+    const accessToken = signToken(payload, '30m');
+    const refreshToken = signToken(payload, '7d', true);
+
+    // Set HTTP-only cookie for refresh token
+    res.cookie('refreshToken', refreshToken, { 
+      httpOnly: true, 
+      // sameSite: 'Strict', // TODO -> Uncomment and test for production
+      // secure: true // Uncoment for production
+    });
+
     await transaction.commit(client);
-    response.success.sendToken(res, token, { body: { user, pass: true, confirmed: { email: !emailExist, mobile: !mobile }}});
+    response.success.sendToken(res, accessToken, { body: { user, pass: true, confirmed: { email: !emailExist, mobile: !mobile }}});
     log.info(`| FP | Password changed`);
   } catch (err) {
     log.error(`Error Setting new password for ${email}:\n ${err}`);
@@ -251,11 +311,42 @@ const resetPassword = async (req, res) => {
     await transaction.rollback(client);
     response.serverError.serverError(res);
   }
-}
+};
+
+/* ----------------------- Token Related ----------------------- */
+/* ------------------------------------------------------------- */
+
+const refreshToken = (req, res) => {
+  const refreshToken = req.cookies.refreshToken;
+  log.info(`Resetting token using -> ${refreshToken} ...`);
+
+  if (!refreshToken) {
+    log.warn('No refresh token');
+    return response.clientError.noPrivilages(res);
+  }
+
+  try {
+    const decoded = extractRefreshToken(refreshToken);
+    const payload = {
+      username: decoded.username,
+      email: decoded.email,
+    };
+
+    const newAccessToken = signToken(payload, '30m');
+
+    response.success.success(res, { body: `Bearer ${newAccessToken}` });
+    log.info(`New token has been sent`);
+  } catch (error) {
+    log.warn('Invalid refresh token');
+    return response.clientError.noPrivilages(res);
+  }
+};
 
 module.exports = {
   login,
+  logout,
   register,
+  refreshToken,
   resetPassword,
   forgotPassword,
   confirmAccount,

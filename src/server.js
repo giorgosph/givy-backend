@@ -1,9 +1,12 @@
 const express = require("express");
+
 const http = require('http');
 const WebSocket = require('ws');
 
 const cors = require("cors");
 const cron = require('node-cron');
+const session = require('express-session');
+const cookieParser = require('cookie-parser');
 
 require("dotenv").config();
 
@@ -25,6 +28,14 @@ const apiRoute = "/api/v1";
 
 app.use(cors());
 app.use(express.json());
+app.use(cookieParser());
+app.use(
+  session({
+    secret: process.env.SECRET,
+    resave: false,
+    saveUninitialized: true,
+  })
+);
 
 // Set up routes
 app.use(`${apiRoute}/users`, users);

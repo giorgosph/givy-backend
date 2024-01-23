@@ -10,11 +10,14 @@ const notify = require("../controllers").notification;
 
 router.put("/login", auth.login);
 router.post("/register", auth.register);
+router.post("/logout", verifyToken, auth.logout);
 
 router.put("/forgot-password", auth.forgotPassword);
 router.put("/reset-password", verifyToken, auth.resetPassword);
 
 router.delete("/confirm", verifyToken, auth.confirmAccount);
+
+router.post("/refresh-token", auth.refreshToken);
 
 /* ------------------------ User Details Routes ------------------------ */
 

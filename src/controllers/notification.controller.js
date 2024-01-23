@@ -74,7 +74,7 @@ const smsWithCode = async (req, res) => {
 
 const emailForgotPassword = async (req, res) => {
   const { email } = req.body;
-  log(`Sending email to ${email} ...`);
+  log.info(`Sending email to ${email} ...`);
 
   const client = await transaction.start();
 
