@@ -103,7 +103,7 @@ const login = async (req, res) => {
     if(!user) user = await User.findByEmail(username, client); // by email
     if(!user) {
       await transaction.end(client);
-      log.info(`${username} not found`);
+      log.warn(`${username} not found`);
       return response.clientError.userNotAuthenticated(res);
     }
 
@@ -171,9 +171,8 @@ const logout = async (req, res) => {
 const confirmAccount = async (req, res) => {
   const { type } = req.body;
   const { username } = req.decodedToken;
-  const usernamePrefix = `${process.env.USERNAME_PREFIX}${username}`;
 
-  log.info(`Confirming ${type} for ${usernamePrefix} ...`);
+  log.info(`Confirming ${type} for ${username} ...`);
 
   const client = await transaction.start();
   
@@ -182,8 +181,8 @@ const confirmAccount = async (req, res) => {
     validator.confirmAccountValidator(username, type);
 
     // Get User's confirmation info
-    const user = await Confirmation.findUserWithType({ username: usernamePrefix, type}, client);
-    if(!user) throw new Error(`User tries to confirm ${type} without confirmation code`);
+    const user = await Confirmation.findUserWithType({ username, type }, client);
+    if(!user) throw new Error(`| AC | User not found`);
 
     // Check if code provided is valid
     if(user.code == req.body.code) {
@@ -200,7 +199,7 @@ const confirmAccount = async (req, res) => {
 
     log.info(`Account confirmed (${type})`);
   } catch (err) {
-    log.error(`Error Confirming ${type} for ${usernamePrefix}:\n ${err}`);
+    log.error(`Error Confirming ${type} for ${username}:\n ${err}`);
     await transaction.rollback(client);
     response.serverError.serverError(res);
   }

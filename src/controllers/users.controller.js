@@ -66,14 +66,14 @@ const editContactDetails = async (req, res) => {
     if(!user) {
       await transaction.end(client);
       log.warn(`| ECD | User not found`);
-      return response.clientError.userNotAuthenticated(res);
+      throw new Error(`User: ${username} not found`);
     }
 
     const hasNewEmail = email && email !== user.email;
     const hasNewMobile = mobile && mobile !== user.mobile;
 
-    let newEmail = false;
-    let newMobile = false;
+    let newEmail;
+    let newMobile;
 
     if(hasNewEmail) {
       log.debug("Updating email...");
@@ -126,7 +126,7 @@ const editShippingDetails = async (req, res) => {
     if(!userExists) {
       await transaction.end(client);
       log.warn(`| ESD | User not found`);
-      return response.clientError.userNotAuthenticated(res);
+      throw new Error(`User ${username} not found`);
     }
 
     const user = await User.updateAddress({ ...req.body, username: username }, client);
@@ -162,7 +162,7 @@ const feedback = async (req, res) => {
     if(!user) {
       await transaction.end(client);
       log.warn(`| FB | User not found`);
-      return response.clientError.userNotAuthenticated(res, { body: { type: 'Feedback' }});
+      throw new Error(`User: ${username} not found!`);
     }
 
     // Chack lastest submited feedback

@@ -9,7 +9,7 @@ const log = require("../utils/logger/logger");
 /* -------------------------------------------------------------- */
 
 router.put("/fe/err", verifyToken, (req, res) => {
-  // send email to admin with frontend error message
+  // TODO -> send email to admin with frontend error message
   log.debug(`Frontend error: ${req.body.message}`);
   response.success.success(res);
 });

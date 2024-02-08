@@ -25,7 +25,7 @@ const emailWithCode = async (req, res) => {
     if(!user) {
       await transaction.end(client);
       log.warn(`| EWC | User not found`);
-      return response.clientError.userNotAuthenticated(res, { body: { type: 'Email' }});
+      throw new Error(`User: ${username} not found!`);
     }
 
     const randToken = genToken.random();
@@ -55,7 +55,7 @@ const smsWithCode = async (req, res) => {
     if(!user) {
       await transaction.end(client);
       log.warn(`| SWC | User not found`);
-      return response.clientError.userNotAuthenticated(res, { body: { type: 'SMS' }});
+      throw new Error(`User: ${username} not found!`);
     }
 
     const randToken = genToken.random();
@@ -85,7 +85,7 @@ const emailForgotPassword = async (req, res) => {
     if(!user) {
       await transaction.end(client);
       log.warn(`| EFP | User not found`);
-      return response.clientError.userNotAuthenticated(res, { body: { type: 'Email' }});
+      return response.clientError.userNotAuthenticated(res);
     }
 
     const randToken = genToken.random();
@@ -122,7 +122,7 @@ const contactUs = async (req, res) => {
     if(!user) {
       await transaction.end(client);
       log.warn(`| EFU | User not found`);
-      return response.clientError.userNotAuthenticated(res, { body: { type: 'Email' }});
+      throw new Error(`User: ${username} not found!`);
     }
 
     // TODO -> Remove after testing

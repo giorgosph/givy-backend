@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS "confirmation" (
 CREATE TABLE IF NOT EXISTS "draw" (
   "id" SERIAL,
   "title" TEXT NOT NULL,
-  "brief" TEXT,
+  "brief" TEXT NOT NULL,
   "plan" plans DEFAULT 'basic',
   "image_path" TEXT,
   "country" TEXT, -- Not null when applicaiton will be used in different countries
@@ -72,11 +72,11 @@ CREATE TABLE IF NOT EXISTS "draw_attenant" (
 CREATE TABLE IF NOT EXISTS "draw_item" (
   "id" SERIAL ,
   "draw_id" INTEGER NOT NULL,
-  "title" TEXT,
-  "description" TEXT,
+  "title" TEXT NOT NULL,
+  "description" TEXT NOT NULL,
   "image_path" TEXT, -- remove if will use draw_item_image for multiple images per item
-  "brief" TEXT,
-  "price" INTEGER,
+  "brief" TEXT NOT NULL,
+  "price" INTEGER NOT NULL,
   "winner" TEXT,
   PRIMARY KEY ("id"),
   FOREIGN KEY ("draw_id") REFERENCES "draw"("id")
