@@ -1,8 +1,8 @@
 import { server } from "./server";
-import { logger } from "./utils/logger/logger";
+import Logger from "./utils/logger/logger";
 
 const port: number = 3000;
 
 server.listen(port, () => {
-  logger.info(`App listening at http://localhost:${port}`);
+  Logger.info(`App listening at http://localhost:${port}`);
 });

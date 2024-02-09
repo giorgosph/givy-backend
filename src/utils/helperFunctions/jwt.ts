@@ -1,10 +1,11 @@
 import { Request } from "express";
 
-import jwt, { JwtPayload } from "jsonwebtoken";
-import { logger } from "../logger/logger";
+import jwt from "jsonwebtoken";
+import Logger from "../logger/logger";
+import { Payload } from "../types/generalTypes";
 
 export function signToken(
-  payload: JwtPayload,
+  payload: Payload,
   expirationPeriod: string,
   refresh = false
 ) {
@@ -26,23 +27,23 @@ export function extractToken(req: Request) {
     try {
       const decodedToken = jwt.verify(token!, process.env.SECRET!);
 
-      logger.debug(`Decoded Token:\n ${JSON.stringify(decodedToken)}`);
+      Logger.debug(`Decoded Token:\n ${JSON.stringify(decodedToken)}`);
 
-      return decodedToken as JwtPayload;
+      return decodedToken as Payload;
     } catch (err: any) {
-      // specify possible err types
+      // TODO -> specify possible err types
       if (err instanceof jwt.TokenExpiredError) {
-        logger.warn("Token has expired");
+        Logger.warn("Token has expired");
         return "refresh-token";
       } else throw new Error(err);
     }
-  } else logger.warn("No Authorization Header");
+  } else Logger.warn("No Authorization Header");
 }
 
 export function extractRefreshToken(token: string) {
   const decodedToken = jwt.verify(token, process.env.SECRET_REFRESH!);
 
-  logger.debug(`Decoded Refresh Token:\n ${JSON.stringify(decodedToken)}`);
+  Logger.debug(`Decoded Refresh Token:\n ${JSON.stringify(decodedToken)}`);
 
-  return decodedToken as JwtPayload;
+  return decodedToken as Payload;
 }

@@ -1,12 +1,12 @@
 import express from "express";
 
-import { register } from "../controllers/index";
 import { verifyToken } from "../middleware/auth";
 import {
-  getCurrentDraws,
-  getDrawItems,
+  register,
   getUserDraws,
-} from "../controllers/index";
+  getDrawItems,
+  getCurrentDraws,
+} from "../controllers";
 
 const router = express.Router();
 

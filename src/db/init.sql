@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS "users" (
   "email" TEXT UNIQUE NOT NULL,
   "password" TEXT NOT NULL,
   "paid_plan" plans DEFAULT 'basic',
-  "mobile" TEXT UNIQUE,
+  "mobile" INTEGER UNIQUE,
   "mobile_ext" INTEGER,
   "creation_date" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   "is_confirmed" BOOLEAN DEFAULT FALSE,

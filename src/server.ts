@@ -13,16 +13,15 @@ import draws from "./routes/draws.route";
 import admin from "./routes/admin.route";
 
 import { connect as connectWebSocket } from "./webSocket";
-
 import { checkUpcomingDraws } from "./schedulers/draw.scheduler";
 
 /* ---------------------------------------------------------------------- */
 
 config();
 
-const app: Application = express();
+const app = express();
 const server: http.Server = http.createServer(app);
-const wss: WebSocket.Server = new WebSocket.Server({ server });
+const wss = new WebSocket.Server({ server });
 
 const apiRoute: string = "/api/v1";
 

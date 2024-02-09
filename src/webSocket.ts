@@ -1,5 +1,5 @@
 import WebSocket from "ws";
-import { logger } from "./utils/logger/logger";
+import Logger from "./utils/logger/logger";
 
 /* ----- Types ----- */
 type SendProps = {
@@ -10,29 +10,29 @@ type SendProps = {
 
 export function connect(wss: WebSocket.Server) {
   wss.on("connection", (ws: WebSocket) => {
-    logger.info("Web Socket Client connected");
+    Logger.info("Web Socket Client connected");
 
-    ws.on("open", () => logger.debug("New WebSocket connection opened"));
+    ws.on("open", () => Logger.debug("New WebSocket connection opened"));
 
     ws.on("message", (message: string) =>
-      logger.debug(`WebSocket received message:\n ${message}`)
+      Logger.debug(`WebSocket received message:\n ${message}`)
     );
 
-    ws.on("error", (err: Error) => logger.warn(`Error WebSocket:\n ${err}`));
+    ws.on("error", (err: Error) => Logger.warn(`Error WebSocket:\n ${err}`));
 
-    ws.on("close", () => logger.info("WebSocket connection closed"));
+    ws.on("close", () => Logger.info("WebSocket connection closed"));
   });
 }
 
 export function send(data: SendProps) {
   const wss = <WebSocket.Server>require("./server").wss;
 
-  logger.info("Sending message through WebSocket ...");
+  Logger.info("Sending message through WebSocket ...");
 
   wss.clients.forEach((client) => {
     try {
       if (client.readyState === WebSocket.OPEN) {
-        logger.debug(`WebSocket client is ready`);
+        Logger.debug(`WebSocket client is ready`);
         client.send(
           JSON.stringify({
             body: data.body,
@@ -42,11 +42,11 @@ export function send(data: SendProps) {
         );
       }
     } catch (err) {
-      logger.error(
+      Logger.error(
         `Error sending information to the client through WebSocket:\n ${err}`
       );
     }
   });
 
-  logger.info("WebSocket informed");
+  Logger.info("WebSocket informed");
 }

@@ -2,11 +2,11 @@ import { Request, Response, NextFunction } from "express";
 
 import { clientError, serverError } from "../responses";
 
-import { logger } from "../utils/logger/logger";
+import Logger from "../utils/logger/logger";
 import { extractToken } from "../utils/helperFunctions/jwt";
 
 export function verifyToken(req: Request, res: Response, next: NextFunction) {
-  logger.debug(`Verifying token ...`);
+  Logger.debug(`Verifying token ...`);
 
   try {
     const token = extractToken(req);
@@ -20,7 +20,7 @@ export function verifyToken(req: Request, res: Response, next: NextFunction) {
       clientError.noPrivilages(res);
     }
   } catch (err) {
-    logger.error(`Error verifying token:\n ${err}`);
-    serverError(res);
+    Logger.error(`Error verifying token:\n ${err}`);
+    serverError.serverError(res);
   }
 }
