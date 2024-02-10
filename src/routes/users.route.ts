@@ -2,58 +2,38 @@ import express from "express";
 
 import { verifyToken } from "../middleware/auth";
 
-import {
-  emailForgotPassword,
-  smsWithCode,
-  emailWithCode,
-  contactUs,
-} from "../controllers/notification";
-import {
-  getUserDetails,
-  editContactDetails,
-  editShippingDetails,
-  feedback,
-} from "../controllers/users";
-import {
-  login,
-  register,
-  logout,
-  forgotPassword,
-  resetPassword,
-  confirmAccount,
-  refreshToken,
-} from "../controllers/auth";
+import { auth, user, notification } from "../controllers";
 
 const router = express.Router();
 
 /* ------------------------ Auth Routes ------------------------ */
 
-router.put("/login", login);
-router.post("/register", register);
-router.post("/logout", verifyToken, logout);
+router.put("/login", auth.login);
+router.post("/register", auth.register);
+router.post("/logout", verifyToken, auth.logout);
 
-router.put("/forgot-password", forgotPassword);
-router.put("/reset-password", verifyToken, resetPassword);
+router.put("/forgot-password", auth.forgotPassword);
+router.put("/reset-password", verifyToken, auth.resetPassword);
 
-router.delete("/confirm", verifyToken, confirmAccount);
+router.delete("/confirm", verifyToken, auth.confirmAccount);
 
-router.post("/refresh-token", refreshToken);
+router.post("/refresh-token", auth.refreshToken);
 
 /* ------------------------ User Details Routes ------------------------ */
 
-router.get("/details", verifyToken, getUserDetails);
-router.put("/details/contact", verifyToken, editContactDetails);
-router.put("/details/shipping", verifyToken, editShippingDetails);
+router.get("/details", verifyToken, user.getUserDetails);
+router.put("/details/contact", verifyToken, user.editContactDetails);
+router.put("/details/shipping", verifyToken, user.editShippingDetails);
 
-router.post("/feedback", verifyToken, feedback);
+router.post("/feedback", verifyToken, user.feedback);
 
 /* ------------------------ Notification Routes ------------------------ */
 
-router.put("/email/pass", emailForgotPassword);
+router.put("/email/pass", notification.emailForgotPassword);
 
-router.put("/phone/code", verifyToken, smsWithCode);
-router.put("/email/code", verifyToken, emailWithCode);
+router.put("/phone/code", verifyToken, notification.smsWithCode);
+router.put("/email/code", verifyToken, notification.emailWithCode);
 
-router.post("/email/contact", verifyToken, contactUs);
+router.post("/email/contact", verifyToken, notification.contactUs);
 
 export default router;

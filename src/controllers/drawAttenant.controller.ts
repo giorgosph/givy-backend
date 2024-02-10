@@ -1,15 +1,16 @@
-import { Request, Response } from "express";
+import { Response } from "express";
 
 import { transaction } from "../db/db";
 import { serverError, success } from "../responses";
 import DrawAttenant from "../models/DrawAttenant.model";
 
 import Logger from "../utils/logger/logger";
+import { IReqOptIn } from "../utils/types/requestTypes";
 import * as validator from "../utils/helperFunctions/dataValidation";
 
 /* ---------------------- Get User --------------------------- */
 /* ----------------------------------------------------------- */
-const register = async (req: Request, res: Response) => {
+const register = async (req: IReqOptIn, res: Response) => {
   const username = req.decodedToken!.username;
   Logger.info(`Adding draw attenant for ${username} ...`);
 

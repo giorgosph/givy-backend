@@ -1,8 +1,7 @@
 import fs from "fs";
-import { PoolClient } from "pg";
 
 import { transaction } from "./db";
-import { Logger } from "../utils/logger/logger";
+import Logger from "../utils/logger/logger";
 
 const seedTables = fs.readFileSync(__dirname + "/seeds.sql").toString();
 
@@ -11,7 +10,7 @@ const seed = async () => {
 
   try {
     const result = await client.query(seedTables);
-    Logger.debug(result);
+    Logger.debug(String(result));
 
     await transaction.commit(client);
   } catch (err) {

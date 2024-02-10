@@ -2,7 +2,7 @@ import { transaction } from "../db/db";
 import { send as sendWS } from "../webSocket";
 import { User, Draw, DrawItem, DrawAttenant, Confirmation } from "../models";
 
-import { Logger } from "../utils/logger/logger";
+import Logger from "../utils/logger/logger";
 import { send as sendEmail } from "../utils/helperFunctions/email";
 
 /* -------------------------------------------------------------------- */

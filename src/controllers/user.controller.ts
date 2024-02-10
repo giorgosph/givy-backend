@@ -8,6 +8,7 @@ import Logger from "../utils/logger/logger";
 import * as emailer from "../utils/helperFunctions/email";
 import * as genToken from "../utils/helperFunctions/token";
 import * as validator from "../utils/helperFunctions/dataValidation";
+import { IReqEditContact, IReqEditShipping } from "../utils/types/requestTypes";
 
 /* ---------------------- Get User --------------------------- */
 /* ----------------------------------------------------------- */
@@ -40,7 +41,7 @@ const getUserDetails = async (req: Request, res: Response) => {
 /* ---------------------- Update Details --------------------------- */
 /* ----------------------------------------------------------------- */
 
-const editContactDetails = async (req: Request, res: Response) => {
+const editContactDetails = async (req: IReqEditContact, res: Response) => {
   const username = req.decodedToken!.username;
   Logger.info(`Editing Contact Details for ${username} ...`);
 
@@ -116,7 +117,7 @@ const editContactDetails = async (req: Request, res: Response) => {
   }
 };
 
-const editShippingDetails = async (req: Request, res: Response) => {
+const editShippingDetails = async (req: IReqEditShipping, res: Response) => {
   const username = req.decodedToken!.username;
   Logger.info(`Editing Shipping Details for ${username} ...`);
   const client = await transaction.start();

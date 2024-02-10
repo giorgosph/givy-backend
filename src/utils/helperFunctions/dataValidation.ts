@@ -1,6 +1,9 @@
 /* ------------------------- Regex ------------------------- */
 /* --------------------------------------------------------- */
 
+import { RegisterForm, ShippingDetails } from "../types/objectTypes";
+import { IReqRegister } from "../types/requestTypes";
+
 const usernameRegex = /^[A-Za-z0-9.$]+$/;
 
 const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
@@ -45,7 +48,7 @@ const usernameValidator = (username: string) => {
 
 /* ------------------ Auth ------------------ */
 
-const registerValidator = (formData: any) => {
+const registerValidator = (formData: RegisterForm) => {
   const { password, confirmPassword, username, email } = formData;
   const errorMessage = "Register Validator Failed:\n";
 
@@ -74,18 +77,21 @@ const loginValidator = (username: string, password: string) => {
   }
 };
 
-const confirmAccountValidator = (username: string, type: string) => {
+const confirmAccountValidator = (username: string, type: string | number) => {
   const errorMessage = "Confirm Account Validator Failed:\n";
 
   if (!validateUsername(username))
     throw new Error(errorMessage + "Invalid username ->" + username);
-  if (generalRegex.test(type))
+  if (generalRegex.test(String(type)))
     throw new Error(errorMessage + "Invalid type ->" + type);
 };
 
 /* ------------------ User ------------------ */
 
-const shippingDetailsValidator = (username: string, formData: any) => {
+const shippingDetailsValidator = (
+  username: string,
+  formData: ShippingDetails
+) => {
   const errorMessage = "Shipping Details Validator Failed:\n";
 
   if (!validateUsername(username))
@@ -93,8 +99,7 @@ const shippingDetailsValidator = (username: string, formData: any) => {
 
   Object.entries(formData).forEach(([key, value]) => {
     if (key == "email") return;
-    if (generalValidator(value))
-      throw new Error(errorMessage + "Malicious data provided ->" + value);
+    generalValidator(value);
   });
 };
 

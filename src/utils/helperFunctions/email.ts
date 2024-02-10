@@ -5,7 +5,7 @@ import log from "../logger/logger";
 
 /* ----- Types ------ */
 type SendFromUserDataProp = {
-  body: Mail.Options;
+  body: string;
   title: string;
   username: string;
 };

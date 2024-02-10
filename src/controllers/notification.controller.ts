@@ -8,6 +8,7 @@ import Logger from "../utils/logger/logger";
 import * as emailer from "../utils/helperFunctions/email";
 import * as genToken from "../utils/helperFunctions/token";
 import * as validator from "../utils/helperFunctions/dataValidation";
+import { IReqContactUs, IReqEmailFP } from "../utils/types/requestTypes";
 
 /* ------------------- Confirmations ------------------- */
 /* ----------------------------------------------------- */
@@ -82,7 +83,7 @@ const smsWithCode = async (req: Request, res: Response) => {
   }
 };
 
-const emailForgotPassword = async (req: Request, res: Response) => {
+const emailForgotPassword = async (req: IReqEmailFP, res: Response) => {
   const { email } = req.body;
   Logger.info(`Sending email to ${email} ...`);
 
@@ -122,7 +123,7 @@ const emailForgotPassword = async (req: Request, res: Response) => {
 /* --------------- Receiving Notification from User --------------- */
 /* ---------------------------------------------------------------- */
 
-const contactUs = async (req: Request, res: Response) => {
+const contactUs = async (req: IReqContactUs, res: Response) => {
   const username = req.decodedToken!.username;
   Logger.info(`Sending Email from User: ${username} ...`);
 

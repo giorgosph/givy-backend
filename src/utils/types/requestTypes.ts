@@ -1,24 +1,11 @@
 import { Request } from "express";
 import { GenderType } from "../../models/User.model";
+import { ContactDetails, RegisterForm, ShippingDetails } from "./objectTypes";
 
 /* -------------------- Auth -------------------- */
 /* ---------------------------------------------- */
 export interface IReqRegister extends Request {
-  body: {
-    username: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-    password: string;
-    mobile: number;
-    mobileExt: number;
-    gender: GenderType;
-    country: string;
-    city: string;
-    address1: string;
-    address2: string;
-    postalCode: string;
-  };
+  body: RegisterForm;
 }
 
 export interface IReqLogIn extends Request {
@@ -49,5 +36,45 @@ export interface IReqForgotPass extends Request {
     email: string;
     password: string;
     confirmPassword: string;
+  };
+}
+
+/* ----------------- Draw Attenant ----------------- */
+/* ------------------------------------------------- */
+export interface IReqOptIn extends Request {
+  body: {
+    drawId: number;
+  };
+}
+
+/* ----------------- Notifications ----------------- */
+/* ------------------------------------------------- */
+export interface IReqEmailFP extends Request {
+  body: {
+    email: string;
+  };
+}
+
+export interface IReqContactUs extends Request {
+  body: {
+    title: string;
+    body: string;
+  };
+}
+
+/* ------------------- User ------------------- */
+/* -------------------------------------------- */
+export interface IReqEditContact extends Request {
+  body: ContactDetails;
+}
+
+export interface IReqEditShipping extends Request {
+  body: ShippingDetails;
+}
+
+export interface IReqFeedback extends Request {
+  body: {
+    rating: number;
+    comments: string;
   };
 }

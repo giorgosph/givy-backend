@@ -25,7 +25,7 @@ import {
 /* ------------------------ Log In/Sign Up/Log Out ------------------------ */
 /* ------------------------------------------------------------------------ */
 
-export const register = async (req: IReqRegister, res: Response) => {
+const register = async (req: IReqRegister, res: Response) => {
   Logger.info("Creating new User ...");
   const { username, email, password } = req.body;
   const usernamePrefix = `${process.env.USERNAME_PREFIX}${username}`;
@@ -417,7 +417,7 @@ const refreshToken = (req: Request, res: Response) => {
   }
 };
 
-module.exports = {
+export {
   login,
   logout,
   register,

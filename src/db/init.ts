@@ -1,8 +1,7 @@
 import fs from "fs";
-import { PoolClient } from "pg";
 
 import { transaction } from "./db";
-import { Logger } from "../utils/logger/logger";
+import Logger from "../utils/logger/logger";
 
 const initTables = fs.readFileSync(__dirname + "/init.sql", "utf-8");
 
@@ -13,7 +12,7 @@ const initialise = async () => {
     Logger.debug("Connected to database");
 
     const result = await client.query(initTables);
-    Logger.debug(result);
+    Logger.debug(String(result));
 
     await transaction.commit(client);
   } catch (err) {

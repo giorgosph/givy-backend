@@ -1,5 +1,5 @@
 import { Pool, PoolClient } from "pg";
-import { Logger } from "../utils/logger/logger";
+import Logger from "../utils/logger/logger";
 
 require("dotenv").config();
 
