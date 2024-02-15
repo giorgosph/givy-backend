@@ -8,6 +8,7 @@ const router = express.Router();
 /* ------------------------ Get Routes ------------------------ */
 
 router.get("/", draw.getCurrentDraws);
+router.get("/best", draw.getBestDraw);
 router.get("/items/:drawId", draw.getDrawItems);
 router.get("/user", verifyToken, draw.getUserDraws);
 

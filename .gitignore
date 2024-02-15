@@ -9,6 +9,9 @@ data
 migrations
 .eslintrc.json
 
+#Build Files
+dist/
+
 #Logs
 logs
 *.log

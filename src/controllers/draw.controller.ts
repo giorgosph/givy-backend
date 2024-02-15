@@ -27,6 +27,29 @@ const getCurrentDraws = async (req: Request, res: Response) => {
   }
 };
 
+const getBestDraw = async (req: Request, res: Response) => {
+  Logger.debug("Getting best draw ...");
+  const client = await transaction.start();
+
+  try {
+    const draw = await Draw.getBestDraw(client);
+    if (!draw) {
+      await transaction.end(client);
+      success.noData(res);
+    }
+
+    const items = DrawItem.findByDrawID(draw.id, client);
+    await transaction.end(client);
+
+    if (!items) return success.noData(res);
+    success.success(res, { body: { draw, items } });
+  } catch (err) {
+    Logger.error(`Error Getting Best Draw:\n ${err}`);
+    await transaction.end(client);
+    serverError.serverError(res);
+  }
+};
+
 const getUserDraws = async (req: Request, res: Response) => {
   const username = req.decodedToken!.username;
   const client = await transaction.start();
@@ -71,4 +94,4 @@ const getDrawItems = async (req: Request, res: Response) => {
   }
 };
 
-export { getUserDraws, getDrawItems, getCurrentDraws };
+export { getUserDraws, getDrawItems, getCurrentDraws, getBestDraw };
