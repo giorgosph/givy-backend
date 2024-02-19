@@ -28,6 +28,7 @@ interface DrawData {
   creation_date: Date;
   closing_date: Date;
   total_price?: number;
+  draw_images?: string[];
 }
 
 /* ----------------- */
@@ -45,6 +46,7 @@ export default class Draw {
   creationDate: Date;
   closingDate: Date;
   totalPrice?: number;
+  drawImages?: string[];
 
   constructor(data: DrawData) {
     this.id = data.id;
@@ -59,18 +61,18 @@ export default class Draw {
     this.creationDate = data.creation_date;
     this.closingDate = data.closing_date;
     this.totalPrice = data?.total_price || undefined;
+    this.drawImages = data?.draw_images || undefined;
   }
 
   static async getAll(client: PoolClient) {
     const allDraws = await client.query(`SELECT * FROM ${Tables.DRAW};`);
-    return allDraws.rows.map((draw: any) => new Draw(draw));
+    return allDraws.rows.map((draw: DrawData) => new Draw(draw));
   }
 
   static async getBestDraw(client: PoolClient) {
     const draw = await client.query(
       `SELECT d.*, COALESCE(SUM(di.price), 0) AS total_price
-      FROM ${Tables.DRAW} d
-      LEFT JOIN ${Tables.D_ITEM} di ON d.id = di.draw_id
+      FROM ${Tables.DRAW} d LEFT JOIN ${Tables.D_ITEM} di ON d.id = di.draw_id
       WHERE d.closing_date > CURRENT_TIMESTAMP
       GROUP BY d.id
       ORDER BY total_price DESC, d.closing_date DESC
@@ -80,17 +82,32 @@ export default class Draw {
     return new Draw(draw.rows[0]);
   }
 
+  static async getFeaturedDraws(client: PoolClient) {
+    const draws = await client.query(
+      `SELECT d.*, 
+      COALESCE(SUM(di.price), 0) AS total_price, 
+      ARRAY_AGG(DISTINCT di.image_path) AS draw_images
+      FROM ${Tables.DRAW} d LEFT JOIN ${Tables.D_ITEM} di ON d.id = di.draw_id
+      WHERE d.closing_date > CURRENT_TIMESTAMP
+      GROUP BY  d.id
+      ORDER BY total_price DESC, d.closing_date DESC
+      OFFSET 1 LIMIT 2;
+      `
+    );
+    return draws.rows.map((draw: DrawData) => new Draw(draw));
+  }
+
   static async getUpcomingDraws(client: PoolClient) {
     const allDraws = await client.query(
       `SELECT * FROM ${Tables.DRAW} WHERE closing_date > CURRENT_TIMESTAMP;`
     );
-    return allDraws.rows.map((draw: any) => new Draw(draw));
+    return allDraws.rows.map((draw: DrawData) => new Draw(draw));
   }
 
   static async getUpcomingDrawsUnder4Hours(client: PoolClient) {
     const allDraws = await client.query(
       `SELECT * FROM ${Tables.DRAW} WHERE closing_date <= CURRENT_TIMESTAMP + interval '4 hours' AND closing_date > CURRENT_TIMESTAMP;`
     );
-    return allDraws.rows.map((draw: any) => new Draw(draw));
+    return allDraws.rows.map((draw: DrawData) => new Draw(draw));
   }
 }

@@ -9,6 +9,7 @@ const router = express.Router();
 
 router.get("/", draw.getCurrentDraws);
 router.get("/best", draw.getBestDraw);
+router.get("/featured", draw.getFeaturedDraws);
 router.get("/items/:drawId", draw.getDrawItems);
 router.get("/user", verifyToken, draw.getUserDraws);
 

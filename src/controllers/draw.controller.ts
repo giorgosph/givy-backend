@@ -38,7 +38,7 @@ const getBestDraw = async (req: Request, res: Response) => {
       success.noData(res);
     }
 
-    const items = DrawItem.findByDrawID(draw.id, client);
+    const items = await DrawItem.findByDrawID(draw.id, client);
     await transaction.end(client);
 
     if (!items) return success.noData(res);
@@ -71,6 +71,25 @@ const getUserDraws = async (req: Request, res: Response) => {
   }
 };
 
+const getFeaturedDraws = async (req: Request, res: Response) => {
+  Logger.debug("Getting featured draws ...");
+  const client = await transaction.start();
+
+  try {
+    const draws = await Draw.getFeaturedDraws(client);
+    if (!draws) {
+      await transaction.end(client);
+      success.noData(res);
+    }
+
+    success.success(res, { body: draws });
+  } catch (err) {
+    Logger.error(`Error Getting Best Draw:\n ${err}`);
+    await transaction.end(client);
+    serverError.serverError(res);
+  }
+};
+
 /* ---------------- Get Items ---------------- */
 /* ------------------------------------------- */
 
@@ -94,4 +113,10 @@ const getDrawItems = async (req: Request, res: Response) => {
   }
 };
 
-export { getUserDraws, getDrawItems, getCurrentDraws, getBestDraw };
+export {
+  getBestDraw,
+  getUserDraws,
+  getDrawItems,
+  getCurrentDraws,
+  getFeaturedDraws,
+};
