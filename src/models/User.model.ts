@@ -121,7 +121,7 @@ export default class User {
       `SELECT * FROM ${Tables.USERS} WHERE email = $1;`,
       [email]
     );
-    return new User(user.rows[0]);
+    return user.rows.length ? new User(user.rows[0]) : false;
   }
 
   static async findByUsername(username: string, client: PoolClient) {
@@ -129,7 +129,7 @@ export default class User {
       `SELECT * FROM ${Tables.USERS} WHERE username = $1;`,
       [username]
     );
-    return new User(user.rows[0]);
+    return user.rows.length ? new User(user.rows[0]) : false;
   }
 
   static async findByMobile(mobile: number, client: PoolClient) {

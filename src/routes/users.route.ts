@@ -2,7 +2,7 @@ import express from "express";
 
 import { verifyToken } from "../middleware/auth";
 
-import { auth, user, notification } from "../controllers";
+import { auth, user, notification, winners } from "../controllers";
 
 const router = express.Router();
 
@@ -35,5 +35,9 @@ router.put("/phone/code", verifyToken, notification.smsWithCode);
 router.put("/email/code", verifyToken, notification.emailWithCode);
 
 router.post("/email/contact", verifyToken, notification.contactUs);
+
+/* ------------------------ Winners Routes ------------------------ */
+
+router.get("/topWinners", winners.topWinners);
 
 export default router;

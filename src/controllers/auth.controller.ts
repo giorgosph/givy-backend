@@ -55,6 +55,7 @@ const register = async (req: IReqRegister, res: Response) => {
       { ...req.body, username: usernamePrefix, password: hashed },
       client
     );
+    if (!user) throw new Error(`User could not be registered`);
 
     // Send confirmation email
     const randToken = randomToken();
@@ -116,7 +117,7 @@ const register = async (req: IReqRegister, res: Response) => {
     success.sendToken(res, accessToken, {
       body: { user, confirmed: { email: false, mobile: false } },
     });
-    Logger.debug(`New User Created:\n ${user}`);
+    Logger.debug(`New User Created:\n ${JSON.stringify(user)}`);
   } catch (err) {
     Logger.error(`Error Creating ${usernamePrefix}:\n${err}`);
     await transaction.rollback(client);

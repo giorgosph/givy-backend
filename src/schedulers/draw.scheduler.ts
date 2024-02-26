@@ -62,11 +62,10 @@ export const checkUpcomingDraws = async () => {
 
               // Send email and sms to the user
               // TODO -> implement emailer.sendWinner function
-              const { email, mobile } = await User.findByUsername(
-                winner,
-                client2
-              );
-              const isMobileConfirmed = mobile
+              const user = await User.findByUsername(winner, client2);
+              if (!user) throw new Error(`scheduler | User not found`);
+
+              const isMobileConfirmed = user.email
                 ? !(await Confirmation.findUserWithType(
                     { username: winner, type: "mobile" },
                     client2

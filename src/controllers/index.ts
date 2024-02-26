@@ -5,4 +5,6 @@ import * as notification from "./notification.controller";
 import * as draw from "./draw.controller";
 import * as drawAttenant from "./drawAttenant.controller";
 
-export { auth, user, notification, draw, drawAttenant };
+import * as winners from "./winners.controller";
+
+export { auth, user, notification, draw, drawAttenant, winners };
