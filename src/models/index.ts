@@ -1,4 +1,5 @@
 import User from "./User.model";
+import UserPush from "./UserPush.model";
 import UserActivity from "./UserActivity.model";
 import UserFeedback from "./UserFeedback.model";
 import Confirmation from "./Confirmation.model";
@@ -12,6 +13,7 @@ import TopWinner from "./TopWinner.model";
 export {
   User,
   Draw,
+  UserPush,
   DrawItem,
   TopWinner,
   UserActivity,

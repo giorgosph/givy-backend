@@ -1,14 +1,19 @@
 import { Request, Response } from "express";
+import * as messaging from "firebase-admin/messaging";
 
 import { transaction } from "../db/db";
-import { User, Confirmation } from "../models";
+import { User, UserPush, Confirmation } from "../models";
 import { clientError, serverError, success } from "../responses";
 
 import Logger from "../utils/logger/logger";
 import * as emailer from "../utils/helperFunctions/email";
 import * as genToken from "../utils/helperFunctions/token";
 import * as validator from "../utils/helperFunctions/dataValidation";
-import { IReqContactUs, IReqEmailFP } from "../utils/types/requestTypes";
+import {
+  IReqEmailFP,
+  IReqContactUs,
+  IReqPushToUser,
+} from "../utils/types/requestTypes";
 
 /* ------------------- Confirmations ------------------- */
 /* ----------------------------------------------------- */
@@ -162,4 +167,80 @@ const contactUs = async (req: IReqContactUs, res: Response) => {
   }
 };
 
-export { emailWithCode, smsWithCode, emailForgotPassword, contactUs };
+/* --------------------- Push Notifications --------------------- */
+/* -------------------------------------------------------------- */
+
+const registerPushToken = async (req: IReqPushToUser, res: Response) => {
+  const { username } = req.decodedToken!;
+  Logger.info(`Registering Push Token for: ${username}`);
+
+  const client = await transaction.start();
+
+  try {
+    const { pushToken } = req.body;
+
+    const userTokens = await UserPush.getUserTokens(username, client);
+    if (
+      userTokens &&
+      userTokens.some((token) => token.pushToken == pushToken)
+    ) {
+      transaction.end(client);
+      Logger.info(`Push Token for ${username} already registered`);
+      success.success(res);
+      return;
+    }
+
+    await UserPush.insert({ username, pushToken }, client);
+
+    transaction.commit(client);
+    Logger.info(`Push Token for ${username} submitted`);
+    success.success(res);
+  } catch (err) {
+    Logger.error(`Error Registering Push Token to ${username}:\n ${err}`);
+    await transaction.rollback(client);
+    serverError.serverError(res, {
+      message: "Error registering token!\n Please contact support team.",
+    });
+  }
+};
+
+const pushToUser = async (req: IReqPushToUser, res: Response) => {
+  Logger.info(`Sending Push Notification to User`);
+
+  try {
+    const { pushToken } = req.body;
+    const data = {
+      pussykey: "push",
+      pussytitle: "Push Notification",
+      pussycaption: "Push Notification Captions",
+    };
+
+    await messaging.getMessaging().send({
+      token: pushToken,
+      data: data,
+      notification: {
+        title: "Push Notification",
+        body: "This is a push notification from the server.",
+        imageUrl:
+          "https://spectrum-brand.com/cdn/shop/articles/Cover_Photo.jpg?v=1617060405&width=1500",
+      },
+    });
+
+    Logger.debug(`Push Notification sent to User successfully`);
+    success.success(res);
+  } catch (err) {
+    Logger.error(`Error sending Push Notification to the user:\n${err}`);
+    serverError.serverError(res, {
+      message: "Error sending email!\n Please contact support team.",
+    });
+  }
+};
+
+export {
+  contactUs,
+  pushToUser,
+  smsWithCode,
+  emailWithCode,
+  registerPushToken,
+  emailForgotPassword,
+};

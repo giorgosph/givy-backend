@@ -12,6 +12,7 @@ import users from "./routes/users.route";
 import draws from "./routes/draws.route";
 import admin from "./routes/admin.route";
 
+import { createFirebaseAdminApp } from "./firebase";
 import { connect as connectWebSocket } from "./webSocket";
 import { checkUpcomingDraws } from "./schedulers/draw.scheduler";
 
@@ -47,5 +48,8 @@ cron.schedule("0 */4 * * *", checkUpcomingDraws);
 
 // Connect WebSocket to server
 connectWebSocket(wss);
+
+// Initialize Firebase for push notifications
+createFirebaseAdminApp();
 
 export { wss, server };

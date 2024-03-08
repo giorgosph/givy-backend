@@ -25,11 +25,9 @@ export default class TopWinner {
     const winners = await client.query(
       `SELECT u.username, COUNT(di.id) AS num_wins, COALESCE(SUM(di.price), 0) AS total_price
       FROM ${Tables.USERS} u LEFT JOIN ${Tables.D_ITEM} di ON u.username = di.winner
-      GROUP BY u.username HAVING num_wins > 0 ORDER BY total_price DESC, num_wins DESC
+      GROUP BY u.username HAVING COUNT(di.id) > 0 ORDER BY total_price DESC, num_wins DESC
       LIMIT 10;`
     );
-    return winners.rows.length
-      ? winners.rows.map((winner: TopWinnerData) => new TopWinner(winner))
-      : false;
+    return winners.rows.map((winner: TopWinnerData) => new TopWinner(winner));
   }
 }

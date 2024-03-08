@@ -29,6 +29,9 @@ router.post("/feedback", verifyToken, user.feedback);
 
 /* ------------------------ Notification Routes ------------------------ */
 
+router.post("/push/send", notification.pushToUser);
+router.post("/push/register", verifyToken, notification.registerPushToken);
+
 router.put("/email/pass", notification.emailForgotPassword);
 
 router.put("/phone/code", verifyToken, notification.smsWithCode);

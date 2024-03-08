@@ -62,6 +62,12 @@ export interface IReqContactUs extends Request {
   };
 }
 
+export interface IReqPushToUser extends Request {
+  body: {
+    pushToken: string;
+  };
+}
+
 /* ------------------- User ------------------- */
 /* -------------------------------------------- */
 export interface IReqEditContact extends Request {

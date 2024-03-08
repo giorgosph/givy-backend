@@ -7,7 +7,7 @@ CREATE TYPE draw_location AS ENUM('any', 'london', 'reading', 'surrey', 'southam
 CREATE TYPE draw_categories AS ENUM('general', 'electronics', 'home', 'clothing', 'personal_care', 'vacation', 'learning', 'gaming', 'stationery', 'hospitality');
 
 CREATE TABLE IF NOT EXISTS "users" (
-  "username" TEXT UNIQUE, -- TODO -> filter username to add/remove a unique key infront of the original
+  "username" TEXT UNIQUE,
   "first_name" TEXT,
   "last_name" TEXT,
   "email" TEXT UNIQUE NOT NULL,
@@ -26,6 +26,14 @@ CREATE TABLE IF NOT EXISTS "users" (
   "role" roles DEFAULT 'client',
   "last_feedback_date" TIMESTAMP,
   PRIMARY KEY ("username")
+);
+
+CREATE TABLE IF NOT EXISTS "user_push_token" (
+  "username" TEXT NOT NULL,
+  "push_token" TEXT NOT NULL,
+  "creation_date" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY ("username", "push_token"),
+  FOREIGN KEY ("username") REFERENCES "users"("username")
 );
 
 CREATE TABLE IF NOT EXISTS "user_activity" (
