@@ -48,7 +48,7 @@ const endTransaction = async (client: PoolClient) => {
 (async () => {
   try {
     const res = await pool.query("SELECT NOW()");
-    Logger.debug(`Database connected ${res.rows[0].now}`);
+    Logger.info(`Database connected ${res.rows[0].now}`);
   } catch (e) {
     Logger.error(`Database connection error:\n ${e}`);
   }

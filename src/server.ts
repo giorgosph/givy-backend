@@ -11,7 +11,9 @@ import cookieParser from "cookie-parser";
 import users from "./routes/users.route";
 import draws from "./routes/draws.route";
 import admin from "./routes/admin.route";
+import product from "./routes/product.route";
 
+import { createBucket } from "./aws";
 import { createFirebaseAdminApp } from "./firebase";
 import { connect as connectWebSocket } from "./webSocket";
 import { checkUpcomingDraws } from "./schedulers/draw.scheduler";
@@ -41,6 +43,7 @@ app.use(
 app.use(`${apiRoute}/users`, users);
 app.use(`${apiRoute}/draws`, draws);
 app.use(`${apiRoute}/admin`, admin);
+app.use(`${apiRoute}/product`, product);
 
 // Set up scheduler to check for upcoming draws every 4 hours
 cron.schedule("0 */4 * * *", checkUpcomingDraws);
@@ -51,5 +54,8 @@ connectWebSocket(wss);
 
 // Initialize Firebase for push notifications
 createFirebaseAdminApp();
+
+// Create S3 Bucket
+createBucket();
 
 export { wss, server };

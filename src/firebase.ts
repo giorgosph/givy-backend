@@ -1,6 +1,6 @@
-import Logger from "./utils/logger/logger";
 import * as admin from "firebase-admin";
-// const admin = require("firebase-admin");
+
+import Logger from "./utils/logger/logger";
 
 /* ----- Types ----- */
 type ParamsType = {
@@ -32,7 +32,7 @@ export const createFirebaseAdminApp = () => {
       projectId: params.projectId,
     });
 
-    Logger.debug(`FB App initialized`);
+    Logger.info(`FB App initialized`);
   } catch (err) {
     Logger.error(`Error creating FB Admin App: ${err}`);
   }
