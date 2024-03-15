@@ -26,6 +26,13 @@ export default class UserPush {
     this.creationDate = data.creation_date;
   }
 
+  static async getAllTokens(client: PoolClient) {
+    const tokens = await client.query(
+      `SELECT push_token FROM ${Tables.U_PUSH};`
+    );
+    return tokens.rows.map((token: PushTableData) => new UserPush(token));
+  }
+
   static async getUserTokens(username: string, client: PoolClient) {
     const tokens = await client.query(
       `SELECT push_token FROM ${Tables.U_PUSH} WHERE username=$1;`,

@@ -1,5 +1,6 @@
 import { PoolClient } from "pg";
 import Tables from "../utils/constants/tables";
+import { NewItem } from "../utils/types/objectTypes";
 
 /* ----- Types ----- */
 interface DrawItemTableData {
@@ -69,6 +70,23 @@ export default class DrawItem {
       [username]
     );
     return allItems.rows.map((item: any) => new DrawItem(item));
+  }
+
+  static async register(data: NewItem, client: PoolClient) {
+    const item = await client.query(
+      `INSERT INTO ${Tables.D_ITEM} 
+      ("draw_id", "title", "description", "brief", "image_path", "price")
+      VALUES ($1, $2, $3, $4, $5, $6) RETURNING price`,
+      [
+        data.drawId,
+        data.title,
+        data.description,
+        data.brief,
+        data.imagePath,
+        data.price,
+      ]
+    );
+    return new DrawItem(item.rows[0]);
   }
 
   static async setWinner(data: DataProps, client: PoolClient) {

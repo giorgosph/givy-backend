@@ -1,5 +1,6 @@
 import { PoolClient } from "pg";
 import Tables from "../utils/constants/tables";
+import { NewDraw } from "../utils/types/objectTypes";
 
 /* ----- Types ----- */
 export type PlansType = "basic" | "premium" | "platinum";
@@ -109,5 +110,24 @@ export default class Draw {
       `SELECT * FROM ${Tables.DRAW} WHERE closing_date <= CURRENT_TIMESTAMP + interval '4 hours' AND closing_date > CURRENT_TIMESTAMP;`
     );
     return allDraws.rows.map((draw: DrawData) => new Draw(draw));
+  }
+
+  static async register(data: NewDraw, client: PoolClient) {
+    const draw = await client.query(
+      `INSERT INTO ${Tables.DRAW} 
+      ("title", "brief", "image_path", "opening_date", "closing_date", "country", "location", "category")
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id, title`,
+      [
+        data.title,
+        data.brief,
+        data.imagePath,
+        data.openingDate,
+        data.closingDate,
+        "UK",
+        data.location,
+        data.category,
+      ]
+    );
+    return new Draw(draw.rows[0]);
   }
 }

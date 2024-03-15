@@ -1,6 +1,11 @@
 import { Request } from "express";
-import { GenderType } from "../../models/User.model";
-import { ContactDetails, RegisterForm, ShippingDetails } from "./objectTypes";
+import {
+  NewDraw,
+  NewItem,
+  RegisterForm,
+  ContactDetails,
+  ShippingDetails,
+} from "./objectTypes";
 
 /* -------------------- Auth -------------------- */
 /* ---------------------------------------------- */
@@ -82,5 +87,15 @@ export interface IReqFeedback extends Request {
   body: {
     rating: number;
     comments: string;
+  };
+}
+
+/* -------------------- Draw -------------------- */
+/* ---------------------------------------------- */
+export interface IReqNewDraw extends Request {
+  body: {
+    token: string;
+    draw: NewDraw;
+    items: NewItem[];
   };
 }

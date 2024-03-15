@@ -1,14 +1,25 @@
+import {
+  NewDraw,
+  NewItem,
+  RegisterForm,
+  ShippingDetails,
+} from "../types/objectTypes";
+
+const region = process.env.AWS_REGION;
+const bucketName = process.env.AWS_S3_BUCKET_NAME;
+
 /* ------------------------- Regex ------------------------- */
 /* --------------------------------------------------------- */
-
-import { RegisterForm, ShippingDetails } from "../types/objectTypes";
-import { IReqRegister } from "../types/requestTypes";
 
 const usernameRegex = /^[A-Za-z0-9.$]+$/;
 
 const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
 
 const generalRegex = /[\'\";<>`&|\\/%\.\x00]/;
+
+const s3ImageUrlRegex = new RegExp(
+  `^https:\/\/${bucketName}\.s3\.${region}\.amazonaws\.com\/.*$`
+);
 
 /* --------------------- Variable Validation --------------------- */
 /* --------------------------------------------------------------- */
@@ -27,7 +38,7 @@ const validateEmail = (email: string) => {
 /* ---------------------- Custom Validators ---------------------- */
 /* --------------------------------------------------------------- */
 
-const generalValidator = (data: string | number) => {
+const generalValidator = (data: string | number | Date) => {
   if (generalRegex.test(String(data)))
     throw new Error("General Validator Failed:\n" + "Invalid data ->" + data);
 };
@@ -44,6 +55,11 @@ const usernameValidator = (username: string) => {
     throw new Error(
       "Username Validator Failed:\n" + "Invalid username ->" + username
     );
+};
+
+const s3ImageValidator = (data: string) => {
+  if (!s3ImageUrlRegex.test(String(data)))
+    throw new Error("S3 Image Validator Failed:\n" + "Invalid data ->" + data);
 };
 
 /* ------------------ Auth ------------------ */
@@ -103,10 +119,29 @@ const shippingDetailsValidator = (
   });
 };
 
+/* ------------------ Draw ------------------ */
+
+const newDrawValidator = (token: string, draw: NewDraw, items: NewItem[]) => {
+  generalValidator(token);
+
+  Object.entries(draw).forEach(([key, value]) => {
+    if (key == "imagePath") s3ImageValidator(value as string);
+    else generalValidator(value);
+  });
+
+  items.map((item) => {
+    Object.entries(item).forEach(([key, value]) => {
+      if (key == "imagePath") s3ImageValidator(value as string);
+      else generalValidator(value);
+    });
+  });
+};
+
 export {
   loginValidator,
   emailValidator,
   generalValidator,
+  newDrawValidator,
   registerValidator,
   usernameValidator,
   confirmAccountValidator,

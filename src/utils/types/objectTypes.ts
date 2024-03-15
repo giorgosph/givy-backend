@@ -1,5 +1,7 @@
 import { GenderType } from "../../models/User.model";
 
+/* -------------------- User -------------------- */
+/* ---------------------------------------------- */
 export type RegisterForm = ContactDetails &
   ShippingDetails & {
     username: string;
@@ -22,4 +24,25 @@ export type ShippingDetails = {
   address1: string;
   address2: string;
   postalCode: string;
+};
+
+/* -------------------- Draw/Item -------------------- */
+/* --------------------------------------------------- */
+export type NewDraw = {
+  title: string;
+  brief: string;
+  imagePath: string;
+  location: string;
+  category: string;
+  openingDate: Date;
+  closingDate: Date;
+};
+
+export type NewItem = {
+  drawId: number;
+  title: string;
+  description: string;
+  imagePath: string;
+  brief: string;
+  price: number;
 };
