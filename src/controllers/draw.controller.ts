@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import * as messaging from "firebase-admin/messaging";
 
-import { uploadImage } from "../aws";
+import { getImageUrl } from "../aws";
 import { transaction } from "../db/db";
 import { clientError, serverError, success } from "../responses";
 import { Draw, DrawItem, DrawAttenant, UserPush } from "../models";
@@ -20,9 +20,16 @@ const getCurrentDraws = async (req: Request, res: Response) => {
   try {
     const draws = await Draw.getUpcomingDraws(client);
     await transaction.end(client);
-    if (!draws) return success.noData(res);
 
-    success.success(res, { body: draws });
+    if (!draws) return success.noData(res);
+    const updatedDrawsPromises = draws.map(async (draw) => {
+      draw.imagePath = await getImageUrl(draw.imagePath);
+      return draw;
+    });
+
+    const updatedDraws = await Promise.all(updatedDrawsPromises);
+
+    success.success(res, { body: updatedDraws });
   } catch (err) {
     Logger.error(`Error Getting Current Draws:\n ${err}`);
     await transaction.end(client);
@@ -38,14 +45,23 @@ const getBestDraw = async (req: Request, res: Response) => {
     const draw = await Draw.getBestDraw(client);
     if (!draw) {
       await transaction.end(client);
-      success.noData(res);
+      return success.noData(res);
     }
+
+    // Replace imagePath with a new path accessible to S3
+    draw.imagePath = await getImageUrl(draw.imagePath);
 
     const items = await DrawItem.findByDrawID(draw.id, client);
     await transaction.end(client);
 
     if (!items) return success.noData(res);
-    success.success(res, { body: { draw, items } });
+    const updatedItemsPromises = items.map(async (item) => {
+      item.imagePath = await getImageUrl(item.imagePath);
+      return item;
+    });
+    const updatedItems = await Promise.all(updatedItemsPromises);
+
+    success.success(res, { body: { draw, items: updatedItems } });
   } catch (err) {
     Logger.error(`Error Getting Best Draw:\n ${err}`);
     await transaction.end(client);
@@ -80,12 +96,17 @@ const getFeaturedDraws = async (req: Request, res: Response) => {
 
   try {
     const draws = await Draw.getFeaturedDraws(client);
-    if (!draws) {
-      await transaction.end(client);
-      success.noData(res);
-    }
+    await transaction.end(client);
 
-    success.success(res, { body: draws });
+    if (!draws) return success.noData(res);
+    const updatedDrawsPromises = draws.map(async (draw) => {
+      draw.imagePath = await getImageUrl(draw.imagePath);
+      return draw;
+    });
+
+    const updatedDraws = await Promise.all(updatedDrawsPromises);
+
+    success.success(res, { body: updatedDraws });
   } catch (err) {
     Logger.error(`Error Getting Best Draw:\n ${err}`);
     await transaction.end(client);
@@ -100,6 +121,7 @@ const newDraw = async (req: IReqNewDraw, res: Response) => {
   const client = await transaction.start();
 
   try {
+    let totalValue = 0;
     const { token, draw, items } = req.body;
 
     // Validate input
@@ -114,8 +136,6 @@ const newDraw = async (req: IReqNewDraw, res: Response) => {
     // Insert the draw to the db
     const { id, title } = await Draw.register(draw, client);
 
-    let totalValue = 0;
-
     // For each item
     items.map(async (item) => {
       // Insert the item to the db
@@ -124,7 +144,6 @@ const newDraw = async (req: IReqNewDraw, res: Response) => {
         client
       );
       totalValue += price;
-      Logger.debug(`Item created`); // TODO -> remove after testing
     });
 
     // Push notification to all users
@@ -140,8 +159,7 @@ const newDraw = async (req: IReqNewDraw, res: Response) => {
             notification: {
               title: "New Raffle is up! ",
               body: `Hurry up to Opt In for the ${title}. Valuable items are waiting for you, with total value £${totalValue}`,
-              imageUrl:
-                "https://spectrum-brand.com/cdn/shop/articles/Cover_Photo.jpg?v=1617060405&width=1500", // TODO -> adjust/remove after testing
+              imageUrl: draw.imagePath, // TODO -> test (Maybe need to fetch with S3 command first or provide acesskeys to FCM)
             },
           })
           .catch((err) =>
@@ -175,7 +193,13 @@ const getDrawItems = async (req: Request, res: Response) => {
     await transaction.end(client);
 
     if (!items) return success.noData(res);
-    success.success(res, { body: items });
+    const updatedItemsPromises = items.map(async (item) => {
+      item.imagePath = await getImageUrl(item.imagePath);
+      return item;
+    });
+    const updatedItems = await Promise.all(updatedItemsPromises);
+
+    success.success(res, { body: updatedItems });
   } catch (err) {
     Logger.error(`Error Getting Current Draws:\n ${err}`);
     await transaction.end(client);

@@ -9,6 +9,7 @@ import {
 } from "@aws-sdk/client-s3";
 
 import Logger from "./utils/logger/logger";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 /* --------------------------------------------------------------- */
 
@@ -43,31 +44,31 @@ export const createBucket = async () => {
 };
 
 export const uploadImage = async (key: string, image: Buffer) => {
-  let originalKey = key;
+  let newKey = key;
   let index = 1;
 
   try {
     let exists = await getImage(key);
 
     while (exists !== false) {
-      const newKey = `${originalKey}-${index++}`;
+      newKey = `${key}-${index++}`;
       exists = await getImage(newKey);
     }
 
-    const contentType = getImageType(key);
+    const contentType = getImageType(newKey);
     const command = new PutObjectCommand({
       Bucket: bucketName,
-      Key: key,
+      Key: newKey,
       Body: image,
       StorageClass: "STANDARD",
       ContentType: contentType,
     });
 
-    const imageUrl = `https://${bucketName}.s3.${region}.amazonaws.com/${key}`;
+    const imagePath = `https://${bucketName}.s3.${region}.amazonaws.com/${newKey}`;
 
     const response = await client.send(command);
     Logger.info(`Image uploaded successfully to S3 Bucket: \n ${response}`);
-    return imageUrl;
+    return imagePath;
   } catch (err) {
     throw new Error(`Error uploading image to S3 Bucket:\n ${err}`);
   }
@@ -114,10 +115,29 @@ export const getImage = async (key: string) => {
     Logger.info(`Image fetched successfully from S3 Bucket`);
     return image;
   } catch (err: any) {
-    console.log("Check Err:", err); // TODO -> remove after testing
     if (err?.name === "NoSuchKey") return false;
     throw new Error(`Error deleting image from S3 Bucket:\n ${err}`);
   }
+};
+
+export const getImageUrl = async (imagePath: string) => {
+  let key;
+  try {
+    key = imagePath.split("/").pop()!;
+  } catch (err) {
+    return imagePath;
+  }
+
+  if (!(await getImage(key))) return imagePath;
+
+  const command = new GetObjectCommand({
+    Bucket: bucketName,
+    Key: key,
+  });
+
+  // Generate presigned URL with expiration time
+  const presignedUrl = await getSignedUrl(client, command, { expiresIn: 3600 });
+  return presignedUrl;
 };
 
 /* ---------------- Helper Methods ---------------- */
