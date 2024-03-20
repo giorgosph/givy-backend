@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import * as messaging from "firebase-admin/messaging";
 
 import { transaction } from "../db/db";
+import { sendOTP } from "../clicksend";
 import { User, UserPush, Confirmation } from "../models";
 import { clientError, serverError, success } from "../responses";
 
@@ -74,7 +75,7 @@ const smsWithCode = async (req: Request, res: Response) => {
       { type: "mobile", username, code: randToken, notes: "resend" },
       client
     );
-    Logger.debug(`Mobile Confirmation Code for ${username}: ${randToken}`); // TODO -> send confirmation sms
+    await sendOTP("", randToken);
 
     await transaction.commit(client);
     success.success(res, { body: { type: "SMS" } });

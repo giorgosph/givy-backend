@@ -1,4 +1,4 @@
-import express, { Application } from "express";
+import express from "express";
 import { config } from "dotenv";
 
 import http from "http";
@@ -6,6 +6,7 @@ import cors from "cors";
 import WebSocket from "ws";
 import cron from "node-cron";
 import session from "express-session";
+import * as clicksend from "clicksend";
 import cookieParser from "cookie-parser";
 
 import users from "./routes/users.route";
@@ -18,6 +19,8 @@ import { createFirebaseAdminApp } from "./firebase";
 import { connect as connectWebSocket } from "./webSocket";
 import { checkUpcomingDraws } from "./schedulers/draw.scheduler";
 
+// var api = require('../node_modules/clicksend/api.js');
+
 /* ---------------------------------------------------------------------- */
 
 config();
@@ -25,6 +28,10 @@ config();
 const app = express();
 const server: http.Server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
+const smsApi = new clicksend.SMSApi(
+  process.env.CLICKSEND_USERNAME as string,
+  process.env.CLICKSEND_API_KEY as string
+);
 
 const apiRoute: string = "/api/v1";
 
@@ -58,4 +65,4 @@ createFirebaseAdminApp();
 // Create S3 Bucket
 createBucket();
 
-export { wss, server };
+export { wss, smsApi, server };

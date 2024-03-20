@@ -4,6 +4,7 @@ import { User, Draw, DrawItem, DrawAttenant, Confirmation } from "../models";
 
 import Logger from "../utils/logger/logger";
 import { send as sendEmail } from "../utils/helperFunctions/email";
+import { sendToWinner } from "../clicksend";
 
 /* -------------------------------------------------------------------- */
 
@@ -60,19 +61,18 @@ export const checkUpcomingDraws = async () => {
               Logger.info(`Winner for item: ${item.id} -> ${winner}`);
               winners[item.id] = winner;
 
-              // Send email and sms to the user
-              // TODO -> implement emailer.sendWinner function
               const user = await User.findByUsername(winner, client2);
               if (!user) throw new Error(`scheduler | User not found`);
 
-              const isMobileConfirmed = user.email
+              // Send email and SMS to the user
+              const isMobileConfirmed = user.mobile
                 ? !(await Confirmation.findUserWithType(
                     { username: winner, type: "mobile" },
                     client2
                   ))
                 : false;
 
-              if (isMobileConfirmed) 0; // Send sms
+              if (isMobileConfirmed) sendToWinner("", item.title);
               sendEmail("0");
             }
 

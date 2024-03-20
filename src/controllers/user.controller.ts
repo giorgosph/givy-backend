@@ -9,6 +9,7 @@ import * as emailer from "../utils/helperFunctions/email";
 import * as genToken from "../utils/helperFunctions/token";
 import * as validator from "../utils/helperFunctions/dataValidation";
 import { IReqEditContact, IReqEditShipping } from "../utils/types/requestTypes";
+import { sendOTP } from "../clicksend";
 
 /* ---------------------- Get User --------------------------- */
 /* ----------------------------------------------------------- */
@@ -91,13 +92,13 @@ const editContactDetails = async (req: IReqEditContact, res: Response) => {
       Logger.debug("Updating mobile...");
       newMobile = await User.updateMobile({ mobile, username }, client);
 
-      // Create random token and send confirmation sms
+      // Send confirmation SMS
       const randToken = genToken.random();
       await Confirmation.upsert(
         { type: "mobile", username, code: randToken, notes: "update mobile" },
         client
       );
-      Logger.debug(`Mobile Confirmation Code for ${username}: ${randToken}`); // TODO -> send confirmation sms
+      await sendOTP("", randToken);
     }
 
     if (hasNewEmail || hasNewMobile) {

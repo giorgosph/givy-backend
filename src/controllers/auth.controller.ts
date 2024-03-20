@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 
 import { transaction } from "../db/db";
+import { sendOTP } from "../clicksend";
 import { User, UserActivity, Confirmation } from "../models";
 import { clientError, serverError, success } from "../responses";
 
@@ -70,7 +71,7 @@ const register = async (req: IReqRegister, res: Response) => {
     );
     await sendEmail(randToken);
 
-    // Send confirmation sms
+    // Send confirmation SMS
     if (user.mobile) {
       const randToken = randomToken();
       await Confirmation.insert(
@@ -82,9 +83,7 @@ const register = async (req: IReqRegister, res: Response) => {
         },
         client
       );
-      Logger.debug(
-        `Mobile Confirmation Code for ${usernamePrefix}: ${randToken}`
-      ); // TODO -> send confirmation sms
+      await sendOTP("", randToken);
     }
 
     // Sign activities
