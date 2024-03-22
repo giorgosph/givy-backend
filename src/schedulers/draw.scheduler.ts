@@ -1,10 +1,11 @@
 import { transaction } from "../db/db";
+import { sendToWinner } from "../clicksend";
 import { send as sendWS } from "../webSocket";
+
 import { User, Draw, DrawItem, DrawAttenant, Confirmation } from "../models";
 
 import Logger from "../utils/logger/logger";
-import { send as sendEmail } from "../utils/helperFunctions/email";
-import { sendToWinner } from "../clicksend";
+import { sendCode } from "../utils/helperFunctions/email";
 
 /* -------------------------------------------------------------------- */
 
@@ -73,7 +74,7 @@ export const checkUpcomingDraws = async () => {
                 : false;
 
               if (isMobileConfirmed) sendToWinner("", item.title);
-              sendEmail("0");
+              sendCode("0"); // TODO -> Create email template
             }
 
             // Send information to client through WebSocket

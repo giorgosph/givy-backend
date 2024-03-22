@@ -40,7 +40,7 @@ const emailWithCode = async (req: Request, res: Response) => {
       { type: "email", username, code: randToken, notes: "resend" },
       client
     );
-    await emailer.send(randToken); // add receiver user.email
+    await emailer.sendCode(randToken); // TODO -> add receiver user.email
 
     await transaction.commit(client);
     success.success(res, { body: { type: "Email" } });
@@ -110,7 +110,7 @@ const emailForgotPassword = async (req: IReqEmailFP, res: Response) => {
       { type: "forgot_password", username: user.username, code: randToken },
       client
     );
-    await emailer.send(randToken); // add receiver user.email
+    await emailer.sendCode(randToken); // TODO -> add receiver user.email
 
     await transaction.commit(client);
     success.success(res, { body: { type: "Email" } });

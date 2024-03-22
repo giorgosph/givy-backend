@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 
 import { transaction } from "../db/db";
+import { sendOTP } from "../clicksend";
 import { clientError, serverError, success } from "../responses";
 import { User, UserFeedback, UserActivity, Confirmation } from "../models";
 
@@ -9,7 +10,6 @@ import * as emailer from "../utils/helperFunctions/email";
 import * as genToken from "../utils/helperFunctions/token";
 import * as validator from "../utils/helperFunctions/dataValidation";
 import { IReqEditContact, IReqEditShipping } from "../utils/types/requestTypes";
-import { sendOTP } from "../clicksend";
 
 /* ---------------------- Get User --------------------------- */
 /* ----------------------------------------------------------- */
@@ -85,7 +85,7 @@ const editContactDetails = async (req: IReqEditContact, res: Response) => {
         { type: "email", username, code: randToken, notes: "update email" },
         client
       );
-      await emailer.send(randToken);
+      await emailer.sendCode(randToken);
     }
 
     if (hasNewMobile) {

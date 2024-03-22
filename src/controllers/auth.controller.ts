@@ -6,7 +6,7 @@ import { User, UserActivity, Confirmation } from "../models";
 import { clientError, serverError, success } from "../responses";
 
 import Logger from "../utils/logger/logger";
-import { send as sendEmail } from "../utils/helperFunctions/email";
+import { sendCode } from "../utils/helperFunctions/email";
 import { random as randomToken } from "../utils/helperFunctions/token";
 import { encrypt as hash, compareKeys } from "../utils/helperFunctions/hash";
 import { signToken, extractRefreshToken } from "../utils/helperFunctions/jwt";
@@ -69,7 +69,7 @@ const register = async (req: IReqRegister, res: Response) => {
       },
       client
     );
-    await sendEmail(randToken);
+    await sendCode(randToken);
 
     // Send confirmation SMS
     if (user.mobile) {
