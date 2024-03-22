@@ -108,8 +108,8 @@ const register = async (req: IReqRegister, res: Response) => {
     // Set HTTP-only cookie for refresh token
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      // sameSite: 'Strict', // Uncoment for production
-      // secure: true // Uncoment for production
+      sameSite: "strict",
+      secure: true,
     });
 
     await transaction.commit(client);
@@ -180,8 +180,8 @@ const login = async (req: IReqLogIn, res: Response) => {
     // Set HTTP-only cookie for refresh token
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      // sameSite: 'Strict', // Uncoment for production
-      // secure: true // Uncoment for production
+      sameSite: "strict",
+      secure: true,
     });
 
     await transaction.commit(client);
@@ -332,8 +332,8 @@ const forgotPassword = async (req: IReqForgotPass, res: Response) => {
     // Set HTTP-only cookie for refresh token
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      // sameSite: 'Strict', // TODO -> Uncomment and test for production
-      // secure: true // Uncoment for production
+      sameSite: "strict",
+      secure: true,
     });
 
     await transaction.commit(client);

@@ -31,7 +31,6 @@ export function extractToken(req: Request) {
 
       return decodedToken as Payload;
     } catch (err: any) {
-      // TODO -> specify possible err types
       if (err instanceof jwt.TokenExpiredError) {
         Logger.warn("Token has expired");
         return "refresh-token";

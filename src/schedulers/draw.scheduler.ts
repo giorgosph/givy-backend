@@ -73,8 +73,8 @@ export const checkUpcomingDraws = async () => {
                   ))
                 : false;
 
-              if (isMobileConfirmed) sendToWinner("", item.title);
-              sendCode("0"); // TODO -> Create email template
+              if (isMobileConfirmed) sendToWinner("", item.title); // TODO -> use user's number
+              sendCode("0"); // TODO -> Create email template for winner
             }
 
             // Send information to client through WebSocket
