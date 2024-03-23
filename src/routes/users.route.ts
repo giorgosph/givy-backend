@@ -3,6 +3,10 @@ import express from "express";
 import { verifyToken } from "../middleware/auth";
 
 import { auth, user, notification, winners } from "../controllers";
+import {
+  sendFeedbackReceipt,
+  sendFromUser,
+} from "../utils/helperFunctions/email";
 
 const router = express.Router();
 
@@ -38,6 +42,15 @@ router.put("/phone/code", verifyToken, notification.smsWithCode);
 router.put("/email/code", verifyToken, notification.emailWithCode);
 
 router.post("/email/contact", verifyToken, notification.contactUs);
+
+router.post("/email/test/contact", async (req, res) => {
+  try {
+    await sendFeedbackReceipt("test@example.com");
+    res.status(200).json({ message: "success" });
+  } catch (err) {
+    res.status(500).json({ message: "error" });
+  }
+});
 
 /* ------------------------ Winners Routes ------------------------ */
 

@@ -10,8 +10,10 @@ type SendFromUserDataProp = {
   username: string;
 };
 
-/* ------------------ */
+/* ----- Constants ------ */
+const textColor: string = "#ded7da";
 
+/* ----- Transporter ------ */
 const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST,
   port: 465,
@@ -37,31 +39,28 @@ async function sendCode(code: string | number) {
     to: process.env.EMAIL_RECIPIENT,
     subject: "Confirmation Email",
     html: `
-      <!DOCTYPE html>
-      <html lang="en">
+    <!DOCTYPE html>
+    <html lang="en">
       <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
       </head>
-      <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: black;">
-        <table cellpadding="0" cellspacing="0" width="100%">
-          <tr>
-            <td style="padding: 16px;">
-              <div style="color: red; font-weight: bold; font-size: 26px;">Givey</div>
-              <div style="margin: 0; padding: 64px 0;">
-                <p style="color: #fff; text-align: center;">Use the confirmation code below to verify your account!</p>
-                <p style="color: #fff; text-align: center;">Confirmation Code🔑</p>
-                <table cellpadding="0" cellspacing="0" style="background-color: #333; color: white; margin: 0 auto; padding: 16px; border-radius: 8px;">
-                  <tr>
-                    <td>${code}</td>
-                  </tr>
-                </table>
-              </div>
-            </td>
-          </tr>
-        </table>
+            <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: black;">
+        <div style="margin: 0; padding: 16px; background-color: black;">
+          <h1 style="color: red; font-weight: bold;;">Givey</h1>
+          <div style="width: 80%; margin: 64px auto; padding: 0;">
+            <h3 style="color: ${textColor}; text-align: center;">Use the confirmation code below to verify your identity!</h3>
+            <p style="color: ${textColor}; text-align: center;">🔑 Confirmation Code 🔑</p>
+            <div style="width: 120px; background-color: #333; color: ${textColor}; margin: 0 auto; padding: 16px; border-radius: 8px;">
+              <h4 style="text-align: center; margin: 0; padding: 0;">${code}</h4>
+            </div>
+          </div>
+          <small style="color: #ccc2c3; margin: 0 auto; text-align: center;">If this action was not intended by you contact our <a style="color: #4a74f0" href="mailto:support@givey.uk">support team</a></small>
+          <h3 style="color: red; font-weight: bold; margin: 24px 0 0 0;">Regards</h3>
+          <p style="font-size: 12px; color: ${textColor}; margin: 0; padding: 0;">The Givey Team</p>
+        </div>
       </body>
-      </html>
+    </html>
     `,
   };
 
@@ -75,19 +74,101 @@ async function sendCode(code: string | number) {
 }
 
 /**
- * Sends an email with the provided data.
+ * Sends an email from contact us.
  *
  * @param data The data object containing title, username, and body.
- * @param email Optional. The sender's email address.
+ * @param email The sender's email address.
  * @throws Error if there is an issue sending the email.
  */
-async function sendFromUser(data: SendFromUserDataProp, email?: string) {
+async function sendFromUser(data: SendFromUserDataProp, email: string) {
   // Define the email options
   const mailOptions: Mail.Options = {
-    from: email || process.env.EMAIL_RECIPIENT, // || process.env.EMAIL_RECIPIENT is used for testing purposes
-    to: process.env.EMAIL,
-    subject: `${data.title}`,
-    text: `Email from: ${data.username}\n${data.body}`,
+    from: process.env.EMAIL_INFO,
+    to: process.env.EMAIL_INFO,
+    subject: `Email from: ${data.username}`,
+    text: `Email address: ${email}\n\nTitle:\n${data.title}\n\nBody:\n${data.body}`,
+  };
+
+  const userMailOptions: Mail.Options = {
+    from: process.env.EMAIL_NO_REPLY,
+    to: process.env.EMAIL_RECIPIENT, // TODO -> replace with provided email
+    subject: `Your email has been received`,
+    html: `
+    <!DOCTYPE html>
+    <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      </head>
+      <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: black;">
+        <div style="margin: 0; padding: 16px; background-color: black;">
+          <h1 style="color: red; font-weight: bold;;">Givey</h1>
+          <div style="width: 80%; margin: 64px auto; padding: 0;">
+            <h3 style="color: ${textColor}; text-align: center;">This is a confirmation that we have received your email 📨</h3>
+            <p style="color: ${textColor}; text-align: center;">🌞 An agent from our team will contact you as soon as possible! 🌞</p>
+			      <div style="max-width: 80%; color: ${textColor}; margin: 0 auto; padding: 16px; border-radius: 8px; border: 1px solid #ccc;">
+              <div style="border-bottom: 1px solid #ccc; padding-bottom: 8px;">
+              	<h4 style="text-align: center; margin: 0 0 8px 0; padding: 0;">${data.title}</h4>
+              </div>
+              <p style="margin: 16px 0 0 0; padding: 0;">${data.body}</p>
+            </div>
+         </div>
+          <small style="color: #ccc2c3; margin: 0 auto; text-align: center;">If this action was not intended by you contact our <a style="color: #4a74f0" href="mailto:support@givey.uk">support team</a></small>
+          <h3 style="color: red; font-weight: bold; margin: 24px 0 0 0;">Regards</h3>
+          <p style="font-size: 12px; color: ${textColor}; margin: 0; padding: 0;">The Givey Team</p>
+        </div>
+      </body>
+    </html>
+    `,
+  };
+
+  // Send the email
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    Logger.debug(`Email sent to Givey team: ${info.response}`);
+
+    const info2 = await transporter.sendMail(userMailOptions);
+    Logger.debug(`Email sent to user: ${info2.response}`);
+  } catch (e) {
+    throw new Error("Error sending email:\n" + e);
+  }
+}
+
+/**
+ * Sends an email confirmation for feedback.
+ *
+ * @param email The sender's email address.
+ * @throws Error if there is an issue sending the email.
+ */
+async function sendFeedbackReceipt(email: string) {
+  // Define the email options
+  const mailOptions = {
+    from: process.env.EMAIL_NO_REPLY,
+    to: process.env.EMAIL_RECIPIENT, // TODO -> change to user email
+    subject: "Feedback Received",
+    html: `
+    <!DOCTYPE html>
+    <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      </head>
+      <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: black;">
+        <div style="margin: 0; padding: 16px; background-color: black;">
+          <h1 style="color: red; font-weight: bold;;">Givey</h1>
+          <div style="width: 80%; margin: 64px auto; padding: 0;">
+            <h3 style="color: ${textColor}; text-align: center;">Thank you your feedback 🌟</h3>
+            <p style="color: ${textColor}; text-align: center;">We value our users' insights and we will be working 🧑‍💻 on improving your experience.</p>
+            <p style="color: ${textColor}; text-align: center;">We encourage you to update your feedback in the future or contact us with any recomendations!</p>
+        </div>
+          <small style="color: ${textColor}; text-align: center;">Note that any future feedback will replace your existing one.</small>
+          <small style="color: #ccc2c3; margin: 0 auto; text-align: center;">If this action was not intented by you contact our <a style="color: #4a74f0" href="mailto:support@givey.uk">support team</a></small>
+            <h3 style="color: red; font-weight: bold; margin: 24px 0 0 0;">Regards</h3>
+            <p style="font-size: 12px; color: ${textColor}; margin: 0; padding: 0;">The Givey Team</p>
+        </div>
+      </body>
+    </html>
+    `,
   };
 
   // Send the email
@@ -99,4 +180,4 @@ async function sendFromUser(data: SendFromUserDataProp, email?: string) {
   }
 }
 
-export { sendCode, sendFromUser };
+export { sendCode, sendFromUser, sendFeedbackReceipt };

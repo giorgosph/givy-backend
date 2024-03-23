@@ -149,10 +149,6 @@ const contactUs = async (req: IReqContactUs, res: Response) => {
       throw new Error(`User: ${username} not found!`);
     }
 
-    // TODO -> Remove after testing
-    // TODO -> Email must be sent from admin account to admin account mentioning the user's actual email
-    // await emailer.sendFromUser({ title, body, username }, false);
-
     await emailer.sendFromUser({ title, body, username }, user.email);
 
     // In future change to commit if there are changes in database

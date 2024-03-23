@@ -190,7 +190,8 @@ const feedback = async (req: Request, res: Response) => {
     await User.updateFeedbackDate(username, client);
     await UserFeedback.upsert({ username, rating, comments }, client);
 
-    // TODO -> Send "Thank you for your feedback" email to user.email
+    // Send email
+    emailer.sendFeedbackReceipt(user.email);
 
     // Commit
     transaction.commit(client);
